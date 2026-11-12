@@ -1,0 +1,105 @@
+{
+    "schema_version": 1,
+    "notices": [
+        {
+            "category": "reroute",
+            "title": "Nov. 16, 2026: Bus Stop Improvements",
+            "html": "<p><strong>Nov. 16, 2026: Bus Stop Improvements</strong><br />\nImpacted Stops: 1945, 1948, 1978, 7929, 5352 &amp; 7063<br />\nImpacted Lines: 1 Livingston, 22, 23 &amp; 24</p>\n<p>The stops below will be temporarily closed beginning Monday, Nov. 16, for facility improvements. Construction is expected to take 1–2 weeks to complete. Customers should use neighboring stops while work is underway.</p>\n<ul>\n<li>Stop 1945: E. Livingston Ave. &amp; Zettler Rd.\n<ul>\n<li>Lines: 1 Livingston, 23</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 1948: E. Livingston Ave. &amp; Courtright Rd.\n<ul>\n<li>Line: 1 Livingston</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 1978: E. Livingston Ave. &amp; Beechwood Rd.\n<ul>\n<li>Line: 1 Livingston</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 7929: Kimberly Pkwy. N. &amp; Canal Bay Way\n<ul>\n<li>Line: 23</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 5352: S. Hamilton Sq. &amp; Hamilton Sq. Blvd.\n<ul>\n<li>Line: 24</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 7063: Alum Creek Dr. &amp; London-Groveport Rd.\n<ul>\n<li>Lines: 22, 24</li>\n</ul>\n</li>\n</ul>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "e44e6945d0a3d40f70247126eca8d9e6f814a400d8a4f93944b6b53682308035",
+            "id": "44f1222a-32c6-4284-94dc-7c3686e91e52",
+            "first_seen_at": "2026-11-12T01:33:08Z",
+            "updated_at": "2026-11-12T01:33:08Z"
+        },
+        {
+            "category": "reroute",
+            "title": "Nov. 9, 2026: Bus Stop Improvements",
+            "html": "<p><strong>Nov. 9, 2026: Bus Stop Improvements</strong><br />\nImpacted Stops: 5389, 7792, 2738, 2687, 3550<br />\nImpacted Lines: 5, 6, 9, 21, 22 &amp; 71<br />\nImpacted Areas: Renner Rd. Park and Ride</p>\n<p>The stops below will be temporarily closed beginning Monday, Nov. 9, for facility improvements. Construction is expected to take 1–2 weeks to complete. Customers should use neighboring stops while work is underway.</p>\n<ul>\n<li>Stop 5389: Georgesville Rd. &amp; W. Broad St.\n<ul>\n<li>Lines: 6, 21</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 7792: Demorest Rd. Shopping Center\n<ul>\n<li>Line: 9</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 2738: Sullivant Ave. &amp; Ryan Ave.\n<ul>\n<li>Line: 6</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 2687: Sullivant Ave. &amp; Martin Ave.\n<ul>\n<li>Line: 6</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 3550: S. Champion Ave. &amp; E. Whittier St.\n<ul>\n<li>Line 22</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Renner Rd. Park and Ride\n<ul>\n<li>Lines: 5, 71</li>\n</ul>\n</li>\n</ul>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "154027b7aa119fd923d956070243a40b7e82df012eef886f188e1fc37b856500",
+            "id": "36ff6415-5223-4286-95c3-4efc5f7673fc",
+            "first_seen_at": "2026-11-12T01:33:08Z",
+            "updated_at": "2026-11-12T01:33:08Z"
+        },
+        {
+            "category": "reroute",
+            "title": "Nov. 2, 2026: Bus Stop Improvements",
+            "html": "<p><strong>Nov. 2, 2026: Bus Stop Improvements</strong><br />\nImpacted Stops: 1197, 1813, 6084 &amp; 8121<br />\nImpacted Lines: 2, 8, 11, 12, 22, 31 &amp; 102</p>\n<p>Stops 1197, 1813, 6084 &amp; 8121 will be temporarily closed beginning Monday, Nov. 2, for facility improvements. Construction is expected to take 2 weeks to complete. Customers should use neighboring stops while work is underway. Lines 22 and 31 will lay over eastbound on Williams Ave. between Yard St. and Rail St.</p>\n<ul>\n<li><strong>Stop 1197:</strong> N. High St. &amp; E. Hudson St.</li>\n<li><strong>Stop 1813:</strong> McGuffey Rd. &amp; Genessee Ave.</li>\n<li><strong>Stop 6084:</strong> Fields Ave. &amp; Mobility Dr.</li>\n<li><strong>Stop 8121:</strong> Rail St. &amp; Baldwin Dr.</li>\n</ul>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "b1473f9884e8cabed1afe30772c7ac7567ff488b380f693b181ad60e99120881",
+            "id": "3215329e-a3e9-41ab-80cb-344f317cb85d",
+            "first_seen_at": "2026-11-12T01:33:08Z",
+            "updated_at": "2026-11-12T01:33:08Z"
+        },
+        {
+            "category": "reroute",
+            "title": "Sept. 25, 2026–Early 2028: MLK Jr. Blvd. / Mt. Vernon Ave. Construction Impacts",
+            "html": "<p><strong>Sept. 25, 2026–Early 2028: MLK Jr. Blvd. / Mt. Vernon Ave. Construction Impacts</strong><br />\nImpacted Area: Martin Luther King Jr. Blvd. / Mt. Vernon Ave. between Hamilton Ave. and N. Champion Ave.</p>\n<p>Beginning Friday, Sept. 25, construction on Martin Luther King Jr. Blvd. / Mt. Vernon Ave. between Hamilton Ave. and N. Champion Ave. will shift to one lane in each direction.</p>\n<p>As part of this project, Line 7 will be detoured to E. Long St. between Hamilton Ave. and N. Champion Ave. Stops along Mt. Vernon Ave. will be temporarily closed. Customers are encouraged to plan ahead and allow additional travel time while the detour is in effect.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "db2cbfe4e1cd8cacd8605fe1fd80217218b50c5315c201363cc55649f1f4c539",
+            "id": "7ab4742e-4b97-4181-b3a2-fe16969bfdb0",
+            "first_seen_at": "2026-11-12T01:33:08Z",
+            "updated_at": "2026-11-12T01:33:08Z"
+        },
+        {
+            "category": "reroute",
+            "title": "March 2, 2026: Stop 3825 Relocation at W. North Broadway",
+            "html": "<p><a href=\"https://cota.com/static/a980536971d3036224e7879ba905e240/COTA_SID-3825-Relocation.jpg\"><strong>March 2, 2026: Stop 3825 Relocation at W. North Broadway</strong></a><br />\nImpacted Stop: 3825<br />\nImpacted Lines: 1, 32 and 72</p>\n<p>Beginning Monday, March 2, Stop 3825 near the Riverside Hospital staircase will be relocated approximately 200 feet east to W. North Broadway due to roadway construction.</p>\n<p>The stop will remain in service at its new location and will be served by Lines 1, 32 and 72. This relocation is expected to remain in place through 2027.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "b5a03502fbc38158fca751f18d9abea516db466f27acf6ef523ee3e50e1d06a8",
+            "id": "b5a24184-9dc8-4b29-80d4-3708b3083140",
+            "first_seen_at": "2026-11-12T01:33:08Z",
+            "updated_at": "2026-11-12T01:33:08Z"
+        },
+        {
+            "category": "closure",
+            "title": "November 9-13, 2026: E. Long St. Stop Closures",
+            "html": "<p><strong>November 9-13, 2026: E. Long St. Stop Closures</strong><br />\nImpacted Stops: 4158, 4160 &amp; 4162<br />\nImpacted Lines: 007, 009, 011, 041, 042, 043, 044, 045 &amp; 046</p>\n<p>Customers are encouraged to use the nearest neighboring eastbound stops during this five-day construction impact.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "b1c30f217ff5d2f9733f2005d0f636f390baa01fd20727274a89b33a81a3574a",
+            "id": "43d46791-0a01-4204-a9d5-1f3f4273c6a6",
+            "first_seen_at": "2026-11-12T01:33:08Z",
+            "updated_at": "2026-11-12T01:33:08Z"
+        },
+        {
+            "category": "closure",
+            "title": "Oct. 22, 2026: Line 5 Long-Term Stop Closure",
+            "html": "<p><a href=\"https://cota.com/reroutes/2026/cota_2026_sid_1530_closure.jpg\"><strong>Oct. 22, 2026: Line 5 Long-Term Stop Closure</strong></a><br />\nImpacted Stop: 1530<br />\nImpacted Line: 5</p>\n<p>Due to construction, Stop 1530 located at W. 5th Ave. &amp; Doten Ave. will close starting Thursday, Oct. 22, through early 2028. The stop is expected to reopen in January 2028. During this time, Line 5 riders should use nearby same-directional stops.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "5870aa7c2136aa7bb04edfb9537416b2406e090bf92a7afe0403343e908a4c64",
+            "id": "3865cde5-7f0c-46e8-805e-a1a91ff60074",
+            "first_seen_at": "2026-11-12T01:33:08Z",
+            "updated_at": "2026-11-12T01:33:08Z"
+        },
+        {
+            "category": "closure",
+            "title": "Oct. 1–mid-Nov. 2026: Lockbourne Rd. Stop Closure",
+            "html": "<p><a href=\"https://cota.com/reroutes/2026/cota_2026_sid_4660_closure_map.jpg\"><strong>Oct. 1–mid-Nov. 2026: Lockbourne Rd. Stop Closure</strong></a><br />\nImpacted Stop: 4660<br />\nImpacted Line: 4</p>\n<p>Stop #4660 near 2260/2300 Lockbourne Rd. will temporarily close due to construction. Line 4 riders, use nearby, same-directional stops for your route. Impacts are expected to last six weeks, into mid-November.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "32c5b480776053a93c12907c33d65240d0befa475db744338437890b0e5d5c72",
+            "id": "04da9ced-35c4-4264-8f7a-5a97c7a9e872",
+            "first_seen_at": "2026-11-12T01:33:08Z",
+            "updated_at": "2026-11-12T01:33:08Z"
+        },
+        {
+            "category": "closure",
+            "title": "Sept. 23–Sept. 30, 2026: Northwest Blvd. & Giant Eagle Stop Closure",
+            "html": "<p><a href=\"https://cota.com/reroutes/2026/cota_2026_sid_7098_closure_map.jpg\"><strong>Sept. 23–Sept. 30, 2026: Northwest Blvd. &amp; Giant Eagle Stop Closure</strong></a><br />\nImpacted Stop: 7098<br />\nImpacted Lines: 3, 30 &amp; 32</p>\n<p>Stop #7098 is temporarily closed through Sept. 30. Lines 3 &amp; 32 will use nearby stops on Northwest Blvd. or Zollinger Rd., while Line 30 will use neighboring stops along its normal route.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "661203e5001da7c5e25e2ebc0e9586a93a8e3a0559c9d0e3d2381d8c10a2b977",
+            "id": "bf18ff18-8a64-4620-a3e1-ac49c50ca2e7",
+            "first_seen_at": "2026-11-12T01:33:08Z",
+            "updated_at": "2026-11-12T01:33:08Z"
+        },
+        {
+            "category": "closure",
+            "title": "April 2, 2026: Stops 2509 and 7387 Closed",
+            "html": "<p><a href=\"https://cota.com/static/a40af7994103569748c928453a696231/COTA_SID-7536-Closure_March.jpg\"><strong>April 2, 2026: Stops 2509 and 7387 Closed</strong></a><br />\nImpacted Stop: 2509 and 7387</p>\n<p>Due to construction, Stops 2509 and 7387 at E. Broad St. &amp; S. Hamilton Rd. will temporarily close starting Thursday, April 2. Customers should use the nearest same-directional stop in the area for their desired line. Impacts are expected to last approximately 2–3 months.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "e3533a67878fb6cfa7363872da74a8a094bf99a0e421ad5c0f46de9a07efa098",
+            "id": "19b33c78-2514-42c6-9f71-9454706f6991",
+            "first_seen_at": "2026-11-12T01:33:08Z",
+            "updated_at": "2026-11-12T01:33:08Z"
+        }
+    ]
+}

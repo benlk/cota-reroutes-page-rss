@@ -22,7 +22,8 @@ try {
 	if ( is_file( $path ) ) {
 		$previous = json_decode( Scraper::read( $path ), true, 512, JSON_THROW_ON_ERROR );
 	} else {
-		$previous = ['schema_version' => 1, 'notices' => []];
+		fwrite( STDERR, 'Missing notices.json archive.' . "\n" );
+		exit( 2 );
 	}
 	$scraper->validate( $previous, $root . '/reroutes.schema.json' );
 
