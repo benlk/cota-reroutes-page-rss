@@ -4,7 +4,6 @@
 	<arg name="tab-width" value="4"/>
 
 	<exclude-pattern>*/vendor/*</exclude-pattern>
-	<exclude-pattern>*/data/*</exclude-pattern>
 
 	<rule ref="PEAR">
 		<exclude name="Generic.WhiteSpace.DisallowTabIndent" />
@@ -13,7 +12,15 @@
 		<exclude name="Generic.Files.LineLength.TooLong" />
 		<exclude name="PEAR.NamingConventions.ValidFunctionName.FunctionNoCapital" />
 		<exclude name="PEAR.NamingConventions.ValidFunctionName.FunctionNameInvalid" />
+		<exclude name="PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps" />
+		<exclude name="PEAR.NamingConventions.ValidVariableName.PrivateNoUnderscore" />
 		<exclude name="PEAR.Functions.FunctionDeclaration.BraceOnSameLine" />
+		<exclude name="PEAR.Commenting.ClassComment.MissingVersion" />
+		<exclude name="PEAR.Commenting.ClassComment.MissingCategoryTag" />
+		<exclude name="PEAR.Commenting.ClassComment.MissingPackageTag" />
+		<exclude name="PEAR.Commenting.ClassComment.MissingAuthorTag" />
+		<exclude name="PEAR.Commenting.ClassComment.MissingLicenseTag" />
+		<exclude name="PEAR.Commenting.ClassComment.MissingLinkTag" />
 		<exclude name="PEAR.Commenting.FileComment.MissingVersion" />
 		<exclude name="PEAR.Commenting.FileComment.MissingCategoryTag" />
 		<exclude name="PEAR.Commenting.FileComment.MissingPackageTag" />
@@ -21,9 +28,22 @@
 		<exclude name="PEAR.Commenting.FileComment.MissingLicenseTag" />
 		<exclude name="PEAR.Commenting.FileComment.MissingLinkTag" />
 		<exclude name="Generic.Commenting.DocComment.NonParamGroup" />
+		<exclude name="PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore" />
+		<exclude name="PEAR.Classes.ClassDeclaration.OpenBraceNewLine" />
 	</rule>
 
-	<rule ref="WordPress.NamingConventions.ValidVariableName" />
+	<rule ref="WordPress.NamingConventions.ValidVariableName">
+		<properties>
+			<property name="allowed_custom_properties" type="array">
+				<element value="childNodes"/>
+				<element value="firstChild"/>
+				<element value="firstElementChild"/>
+				<element value="nextSibling"/>
+				<element value="tagName"/>
+				<element value="textContent"/>
+			</property>
+		</properties>
+	</rule>
 	<rule ref="Generic.WhiteSpace.DisallowSpaceIndent" />
 
 	<rule ref="Generic.WhiteSpace.ScopeIndent">
