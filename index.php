@@ -47,7 +47,7 @@ $html = <<<HTML
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="An independent archive and RSS feed of COTA reroutes, closures, and reopenings.">
-	<title>COTA Reroute Scraper</title>
+	<title>COTA Reroute Page Scraper and RSS Feed</title>
 	<link rel="stylesheet" href="style.css">
 	<link rel="alternate" type="application/rss+xml" title="COTA Reroute Notices" href="feed.xml">
 </head>
@@ -55,11 +55,11 @@ $html = <<<HTML
 	<a class="skip-link" href="#content">Skip to content</a>
 	<header class="site-header">
 		<div class="header-inner">
-			<a class="site-name" href="./">COTA Reroute Archive</a>
+			<a class="site-name" href="./">COTA Reroute Scraper</a>
 			<nav aria-label="Primary navigation">
 				<a href="feed.xml">RSS feed</a>
 				<a href="{$repository_url}">GitHub</a>
-				<a href="https://cota.com/reroutes/">COTA reroutes</a>
+				<a href="https://cota.com/reroutes/">COTA Reroutes</a>
 			</nav>
 		</div>
 	</header>
