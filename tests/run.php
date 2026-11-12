@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 use Cota\Scraper;
 
-require dirname(__DIR__) . '/vendor/autoload.php';
+require dirname( __DIR__ ) . '/vendor/autoload.php';
 
 /**
  * Fail the test run if the supplied condition is false.
@@ -24,8 +24,8 @@ require dirname(__DIR__) . '/vendor/autoload.php';
  * @throws RuntimeException If the condition is false.
  */
 function check(bool $condition, string $message): void {
-	if (!$condition) {
-		throw new RuntimeException($message);
+	if ( !$condition ) {
+		throw new RuntimeException( $message );
 	}
 }
 
@@ -43,10 +43,10 @@ function check(bool $condition, string $message): void {
 function rejects(callable $operation, string $message): void {
 	try {
 		$operation();
-	} catch (Throwable) {
+	} catch ( Throwable ) {
 		return;
 	}
-	throw new RuntimeException($message);
+	throw new RuntimeException( $message );
 }
 
 /**
@@ -85,19 +85,19 @@ final class ScraperTests {
 	 */
 	public function run_all(): void {
 		$count = 0;
-		foreach (get_class_methods($this) as $method) {
-			if (!str_starts_with($method, 'test_')) {
+		foreach ( get_class_methods( $this ) as $method ) {
+			if ( !str_starts_with( $method, 'test_' ) ) {
 				continue;
 			}
 			try {
 				$this->set_up();
 				$this->$method();
-			} catch (Throwable $error) {
-				throw new RuntimeException($method . ': ' . $error->getMessage(), 0, $error);
+			} catch ( Throwable $error ) {
+				throw new RuntimeException( $method . ': ' . $error->getMessage(), 0, $error );
 			}
 			$count++;
 		}
-		printf("All %d scraper tests passed.\n", $count);
+		printf( "All %d scraper tests passed.\n", $count );
 	}
 
 	/**
@@ -108,8 +108,8 @@ final class ScraperTests {
 	 */
 	private function set_up(): void {
 		$this->scraper = new Scraper();
-		$this->schema  = dirname(__DIR__) . '/reroutes.schema.json';
-		$this->html    = Scraper::read(__DIR__ . '/notices.html');
+		$this->schema  = dirname( __DIR__ ) . '/reroutes.schema.json';
+		$this->html    = Scraper::read( __DIR__ . '/notices.html' );
 		$response      = json_encode(
 			[
 				'path' => '/reroutes/',
@@ -130,9 +130,9 @@ final class ScraperTests {
 			],
 			JSON_THROW_ON_ERROR
 		);
-		$this->notices = $this->scraper->extract_response($response);
-		$this->data    = $this->scraper->reconcile(self::EMPTY_STATE, $this->notices, self::FIRST);
-		$this->scraper->validate($this->data, $this->schema);
+		$this->notices = $this->scraper->extract_response( $response );
+		$this->data    = $this->scraper->reconcile( self::EMPTY_STATE, $this->notices, self::FIRST );
+		$this->scraper->validate( $this->data, $this->schema );
 	}
 
 	/**
@@ -142,7 +142,7 @@ final class ScraperTests {
 	 * @throws RuntimeException If the extracted notice count is incorrect.
 	 */
 	private function test_notice_boundaries(): void {
-		check(count($this->notices) === 3, 'Expected three notices, not bold list labels.');
+		check( count( $this->notices ) === 3, 'Expected three notices, not bold list labels.' );
 	}
 
 	/**
@@ -152,7 +152,7 @@ final class ScraperTests {
 	 * @throws RuntimeException If list markup is missing.
 	 */
 	private function test_lists_retained(): void {
-		check(str_contains($this->notices[0]['html'], '<ul>'), 'Lists must be retained.');
+		check( str_contains( $this->notices[0]['html'], '<ul>' ), 'Lists must be retained.' );
 	}
 
 	/**
@@ -162,7 +162,7 @@ final class ScraperTests {
 	 * @throws RuntimeException If the supporting paragraph is missing.
 	 */
 	private function test_body_paragraphs_retained(): void {
-		check(str_contains($this->notices[0]['html'], 'Use neighboring stops.'), 'Body paragraphs must be retained.');
+		check( str_contains( $this->notices[0]['html'], 'Use neighboring stops.' ), 'Body paragraphs must be retained.' );
 	}
 
 	/**
@@ -172,7 +172,7 @@ final class ScraperTests {
 	 * @throws RuntimeException If an event handler survives sanitization.
 	 */
 	private function test_event_handlers_removed(): void {
-		check(!str_contains($this->notices[0]['html'], 'onclick'), 'Event handlers must be removed.');
+		check( !str_contains( $this->notices[0]['html'], 'onclick' ), 'Event handlers must be removed.' );
 	}
 
 	/**
@@ -182,7 +182,7 @@ final class ScraperTests {
 	 * @throws RuntimeException If the expected absolute link is missing.
 	 */
 	private function test_relative_urls_resolved(): void {
-		check(str_contains($this->notices[1]['html'], 'https://cota.com/reroutes/map.jpg'), 'Resolve relative URLs.');
+		check( str_contains( $this->notices[1]['html'], 'https://cota.com/reroutes/map.jpg' ), 'Resolve relative URLs.' );
 	}
 
 	/**
@@ -192,7 +192,7 @@ final class ScraperTests {
 	 * @throws RuntimeException If an unsafe URL scheme remains.
 	 */
 	private function test_unsafe_urls_removed(): void {
-		check(!str_contains($this->notices[1]['html'], 'javascript:'), 'Unsafe URL schemes must be removed.');
+		check( !str_contains( $this->notices[1]['html'], 'javascript:' ), 'Unsafe URL schemes must be removed.' );
 	}
 
 	/**
@@ -202,7 +202,7 @@ final class ScraperTests {
 	 * @throws RuntimeException If footer text appears in a notice.
 	 */
 	private function test_footer_excluded(): void {
-		check(!str_contains($this->notices[2]['html'], 'Sign up'), 'Exclude footer content.');
+		check( !str_contains( $this->notices[2]['html'], 'Sign up' ), 'Exclude footer content.' );
 	}
 
 	/**
@@ -212,7 +212,7 @@ final class ScraperTests {
 	 * @throws RuntimeException If the invalid response is accepted.
 	 */
 	private function test_invalid_gatsby_structure_rejected(): void {
-		rejects(fn () => $this->scraper->extract_response('{}'), 'Reject changed Gatsby structure.');
+		rejects( fn () => $this->scraper->extract_response( '{}' ), 'Reject changed Gatsby structure.' );
 	}
 
 	/**
@@ -222,8 +222,8 @@ final class ScraperTests {
 	 * @throws RuntimeException If a missing category is accepted.
 	 */
 	private function test_missing_category_rejected(): void {
-		$html = str_replace('<h3>Closures</h3>', '', $this->html);
-		rejects(fn () => $this->scraper->extract($html), 'Reject missing categories.');
+		$html = str_replace( '<h3>Closures</h3>', '', $this->html );
+		rejects( fn () => $this->scraper->extract( $html ), 'Reject missing categories.' );
 	}
 
 	/**
@@ -233,8 +233,8 @@ final class ScraperTests {
 	 * @throws RuntimeException If an unexplained empty section is accepted.
 	 */
 	private function test_unexplained_empty_section_rejected(): void {
-		$html = str_replace('There are no reopenings at this time.', '', $this->html);
-		rejects(fn () => $this->scraper->extract($html), 'Reject unexplained empty sections.');
+		$html = str_replace( 'There are no reopenings at this time.', '', $this->html );
+		rejects( fn () => $this->scraper->extract( $html ), 'Reject unexplained empty sections.' );
 	}
 
 	/**
@@ -244,8 +244,8 @@ final class ScraperTests {
 	 * @throws RuntimeException If duplicate titles are accepted.
 	 */
 	private function test_duplicate_titles_rejected(): void {
-		$html = str_replace('Nov. 9: Relocation', 'Nov. 16: Improvements', $this->html);
-		rejects(fn () => $this->scraper->extract($html), 'Reject duplicate titles.');
+		$html = str_replace( 'Nov. 9: Relocation', 'Nov. 16: Improvements', $this->html );
+		rejects( fn () => $this->scraper->extract( $html ), 'Reject duplicate titles.' );
 	}
 
 	/**
@@ -255,8 +255,8 @@ final class ScraperTests {
 	 * @throws RuntimeException If unfamiliar markup is accepted.
 	 */
 	private function test_unfamiliar_markup_rejected(): void {
-		$html = str_replace('<ul>', '<div>', $this->html);
-		rejects(fn () => $this->scraper->extract($html), 'Reject unfamiliar markup.');
+		$html = str_replace( '<ul>', '<div>', $this->html );
+		rejects( fn () => $this->scraper->extract( $html ), 'Reject unfamiliar markup.' );
 	}
 
 	/**
@@ -266,8 +266,8 @@ final class ScraperTests {
 	 * @throws RuntimeException If a mismatched empty message is accepted.
 	 */
 	private function test_mismatched_empty_message_rejected(): void {
-		$html = str_replace('There are no reopenings at this time.', 'There are no closures at this time.', $this->html);
-		rejects(fn () => $this->scraper->extract($html), 'Reject mismatched empty message.');
+		$html = str_replace( 'There are no reopenings at this time.', 'There are no closures at this time.', $this->html );
+		rejects( fn () => $this->scraper->extract( $html ), 'Reject mismatched empty message.' );
 	}
 
 	/**
@@ -277,8 +277,8 @@ final class ScraperTests {
 	 * @throws RuntimeException If unchanged notices alter archive state.
 	 */
 	private function test_unchanged_scrape_preserves_state(): void {
-		$actual = $this->scraper->reconcile($this->data, $this->notices, self::LATER);
-		check($actual === $this->data, 'Unchanged scrapes must not change records.');
+		$actual = $this->scraper->reconcile( $this->data, $this->notices, self::LATER );
+		check( $actual === $this->data, 'Unchanged scrapes must not change records.' );
 	}
 
 	/**
@@ -290,12 +290,12 @@ final class ScraperTests {
 	private function test_punctuation_edits_preserve_identity(): void {
 		$changed = $this->notices;
 		$changed[0]['title'] = "\u{201c}Nov 16 Improvements\u{201d}\u{2014}";
-		$updated = $this->scraper->reconcile($this->data, $changed, self::LATER);
-		check(count($updated['notices']) === count($this->data['notices']), 'Punctuation-only title edits must not create records.');
-		check($updated['notices'][0]['id'] === $this->data['notices'][0]['id'], 'ASCII and Unicode punctuation must not affect identity.');
-		check($updated['notices'][0]['first_seen_at'] === self::FIRST, 'Punctuation-only edits must preserve first-seen time.');
-		check($updated['notices'][0]['updated_at'] === self::LATER, 'Punctuation-only edits must still update the stored title timestamp.');
-		$this->scraper->validate($updated, $this->schema);
+		$updated = $this->scraper->reconcile( $this->data, $changed, self::LATER );
+		check( count( $updated['notices'] ) === count( $this->data['notices'] ), 'Punctuation-only title edits must not create records.' );
+		check( $updated['notices'][0]['id'] === $this->data['notices'][0]['id'], 'ASCII and Unicode punctuation must not affect identity.' );
+		check( $updated['notices'][0]['first_seen_at'] === self::FIRST, 'Punctuation-only edits must preserve first-seen time.' );
+		check( $updated['notices'][0]['updated_at'] === self::LATER, 'Punctuation-only edits must still update the stored title timestamp.' );
+		$this->scraper->validate( $updated, $this->schema );
 	}
 
 	/**
@@ -308,7 +308,7 @@ final class ScraperTests {
 		$duplicate = $this->notices[0];
 		$duplicate['title'] = "\u{201c}Nov 16 Improvements\u{201d}\u{2014}";
 		$notices = [$this->notices[0], $duplicate];
-		rejects(fn () => $this->scraper->reconcile(self::EMPTY_STATE, $notices, self::LATER), 'Reject titles that differ only by punctuation.');
+		rejects( fn () => $this->scraper->reconcile( self::EMPTY_STATE, $notices, self::LATER ), 'Reject titles that differ only by punctuation.' );
 	}
 
 	/**
@@ -320,11 +320,11 @@ final class ScraperTests {
 	private function test_body_edits_preserve_identity(): void {
 		$changed = $this->notices;
 		$changed[0]['html'] .= '<p>Updated.</p>';
-		$updated = $this->scraper->reconcile($this->data, $changed, self::LATER);
-		check($updated['notices'][0]['id'] === $this->data['notices'][0]['id'], 'Edits must preserve IDs.');
-		check($updated['notices'][0]['first_seen_at'] === self::FIRST, 'Edits must preserve first-seen time.');
-		check($updated['notices'][0]['updated_at'] === self::LATER, 'Edits must advance updated time.');
-		$this->scraper->validate($updated, $this->schema);
+		$updated = $this->scraper->reconcile( $this->data, $changed, self::LATER );
+		check( $updated['notices'][0]['id'] === $this->data['notices'][0]['id'], 'Edits must preserve IDs.' );
+		check( $updated['notices'][0]['first_seen_at'] === self::FIRST, 'Edits must preserve first-seen time.' );
+		check( $updated['notices'][0]['updated_at'] === self::LATER, 'Edits must advance updated time.' );
+		$this->scraper->validate( $updated, $this->schema );
 	}
 
 	/**
@@ -334,9 +334,9 @@ final class ScraperTests {
 	 * @throws Throwable If a removal timestamp or resulting schema validation fails.
 	 */
 	private function test_missing_notice_retained(): void {
-		$removed = $this->scraper->reconcile($this->data, array_slice($this->notices, 1), self::LATER);
-		check($removed['notices'][0]['removed_at'] === self::LATER, 'Retain missing notices with removal timestamps.');
-		$this->scraper->validate($removed, $this->schema);
+		$removed = $this->scraper->reconcile( $this->data, array_slice( $this->notices, 1 ), self::LATER );
+		check( $removed['notices'][0]['removed_at'] === self::LATER, 'Retain missing notices with removal timestamps.' );
+		$this->scraper->validate( $removed, $this->schema );
 	}
 
 	/**
@@ -346,9 +346,9 @@ final class ScraperTests {
 	 * @throws RuntimeException If an already removed record changes.
 	 */
 	private function test_removal_timestamp_preserved(): void {
-		$visible = array_slice($this->notices, 1);
-		$removed = $this->scraper->reconcile($this->data, $visible, self::LATER);
-		check($this->scraper->reconcile($removed, $visible, self::LATEST) === $removed, 'Do not advance removal timestamps.');
+		$visible = array_slice( $this->notices, 1 );
+		$removed = $this->scraper->reconcile( $this->data, $visible, self::LATER );
+		check( $this->scraper->reconcile( $removed, $visible, self::LATEST ) === $removed, 'Do not advance removal timestamps.' );
 	}
 
 	/**
@@ -358,8 +358,8 @@ final class ScraperTests {
 	 * @throws RuntimeException If a reappearing notice does not regain its original state.
 	 */
 	private function test_reappearance_clears_removal(): void {
-		$removed = $this->scraper->reconcile($this->data, array_slice($this->notices, 1), self::LATER);
-		check($this->scraper->reconcile($removed, $this->notices, self::LATEST) === $this->data, 'Reappearance must clear removal without changing identity.');
+		$removed = $this->scraper->reconcile( $this->data, array_slice( $this->notices, 1 ), self::LATER );
+		check( $this->scraper->reconcile( $removed, $this->notices, self::LATEST ) === $this->data, 'Reappearance must clear removal without changing identity.' );
 	}
 
 	/**
@@ -370,7 +370,7 @@ final class ScraperTests {
 	 */
 	private function test_explicitly_empty_categories(): void {
 		$html = '<h3>Reroutes</h3><p>There are no reroutes at this time.</p><h3>Closures</h3><p>There are no closures at this time.</p><h3>Reopenings</h3><p>There are no reopenings at this time.</p>';
-		check($this->scraper->extract($html) === [], 'Explicitly empty categories are valid.');
+		check( $this->scraper->extract( $html ) === [], 'Explicitly empty categories are valid.' );
 	}
 
 	/**
@@ -382,7 +382,7 @@ final class ScraperTests {
 	private function test_invalid_category_rejected(): void {
 		$bad = $this->data;
 		$bad['notices'][0]['category'] = 'other';
-		rejects(fn () => $this->scraper->validate($bad, $this->schema), 'Reject invalid category.');
+		rejects( fn () => $this->scraper->validate( $bad, $this->schema ), 'Reject invalid category.' );
 	}
 
 	/**
@@ -394,7 +394,7 @@ final class ScraperTests {
 	private function test_invalid_datetime_rejected(): void {
 		$bad = $this->data;
 		$bad['notices'][0]['first_seen_at'] = 'not-a-date';
-		rejects(fn () => $this->scraper->validate($bad, $this->schema), 'Enforce date-time format.');
+		rejects( fn () => $this->scraper->validate( $bad, $this->schema ), 'Enforce date-time format.' );
 	}
 
 	/**
@@ -406,7 +406,7 @@ final class ScraperTests {
 	private function test_invalid_uuid_rejected(): void {
 		$bad = $this->data;
 		$bad['notices'][0]['id'] = 'not-a-uuid';
-		rejects(fn () => $this->scraper->validate($bad, $this->schema), 'Enforce UUID format.');
+		rejects( fn () => $this->scraper->validate( $bad, $this->schema ), 'Enforce UUID format.' );
 	}
 
 	/**
@@ -417,8 +417,8 @@ final class ScraperTests {
 	 */
 	private function test_incorrect_hash_rejected(): void {
 		$bad = $this->data;
-		$bad['notices'][0]['content_hash'] = str_repeat('0', 64);
-		rejects(fn () => $this->scraper->validate($bad, $this->schema), 'Check stored content hashes.');
+		$bad['notices'][0]['content_hash'] = str_repeat( '0', 64 );
+		rejects( fn () => $this->scraper->validate( $bad, $this->schema ), 'Check stored content hashes.' );
 	}
 
 	/**
@@ -430,7 +430,7 @@ final class ScraperTests {
 	private function test_duplicate_ids_rejected(): void {
 		$bad = $this->data;
 		$bad['notices'][1]['id'] = $bad['notices'][0]['id'];
-		rejects(fn () => $this->scraper->validate($bad, $this->schema), 'Reject duplicate IDs.');
+		rejects( fn () => $this->scraper->validate( $bad, $this->schema ), 'Reject duplicate IDs.' );
 	}
 
 	/**
@@ -442,7 +442,7 @@ final class ScraperTests {
 	private function test_unknown_fields_rejected(): void {
 		$bad = $this->data;
 		$bad['notices'][0]['extra'] = true;
-		rejects(fn () => $this->scraper->validate($bad, $this->schema), 'Reject unknown fields.');
+		rejects( fn () => $this->scraper->validate( $bad, $this->schema ), 'Reject unknown fields.' );
 	}
 
 	/**
@@ -452,14 +452,14 @@ final class ScraperTests {
 	 * @throws Throwable If file creation, persistence, reading, or an assertion fails.
 	 */
 	private function test_persistence_round_trip(): void {
-		$path = sys_get_temp_dir() . '/cota-notices-' . bin2hex(random_bytes(8)) . '.json';
+		$path = sys_get_temp_dir() . '/cota-notices-' . bin2hex( random_bytes( 8 ) ) . '.json';
 		try {
-			check($this->scraper->save($this->data, $path), 'First save should write data.');
-			check(!$this->scraper->save($this->data, $path), 'Unchanged save should not rewrite data.');
-			check(json_decode(Scraper::read($path), true, 512, JSON_THROW_ON_ERROR) === $this->data, 'Stored data should round-trip.');
+			check( $this->scraper->save( $this->data, $path ), 'First save should write data.' );
+			check( !$this->scraper->save( $this->data, $path ), 'Unchanged save should not rewrite data.' );
+			check( json_decode( Scraper::read( $path ), true, 512, JSON_THROW_ON_ERROR ) === $this->data, 'Stored data should round-trip.' );
 		} finally {
-			if (is_file($path)) {
-				unlink($path);
+			if ( is_file( $path ) ) {
+				unlink( $path );
 			}
 		}
 	}

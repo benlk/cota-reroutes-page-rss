@@ -8,7 +8,6 @@
 	<rule ref="PEAR">
 		<exclude name="Generic.WhiteSpace.DisallowTabIndent" />
 		<exclude name="Squiz.Functions.MultiLineFunctionDeclaration" />
-		<exclude name="PEAR.Functions.FunctionCallSignature" />
 		<exclude name="Generic.Files.LineLength.TooLong" />
 		<exclude name="PEAR.NamingConventions.ValidFunctionName.FunctionNoCapital" />
 		<exclude name="PEAR.NamingConventions.ValidFunctionName.FunctionNameInvalid" />
@@ -30,6 +29,7 @@
 		<exclude name="Generic.Commenting.DocComment.NonParamGroup" />
 		<exclude name="PEAR.NamingConventions.ValidFunctionName.PrivateNoUnderscore" />
 		<exclude name="PEAR.Classes.ClassDeclaration.OpenBraceNewLine" />
+		<exclude name="PEAR.ControlStructures.MultiLineCondition.SpacingAfterOpenBrace" />
 	</rule>
 
 	<rule ref="WordPress.NamingConventions.ValidVariableName">
@@ -70,4 +70,6 @@
 			<property name="requiredSpacesBeforeClose" value="1"/>
 		</properties>
 	</rule>
+
+	<rule ref="WordPress.WhiteSpace.ControlStructureSpacing" />
 </ruleset>

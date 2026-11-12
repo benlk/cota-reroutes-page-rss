@@ -50,7 +50,8 @@ final class Scraper {
 	 * @throws RuntimeException If the response or notice structure is unexpected.
 	 */
 	public function fetch(): array {
-		$client = new Client([
+		$client = new Client(
+			[
 			'connect_timeout' => 10,
 			'timeout' => 60,
 			'allow_redirects' => false,
@@ -58,15 +59,16 @@ final class Scraper {
 				'Accept' => 'application/json',
 				'User-Agent' => 'CotaReroutesScraper/1.0 (daily public-page archive)',
 			],
-		]);
-		$response = $client->get(self::ENDPOINT);
-		if ($response->getStatusCode() !== 200
-			|| !preg_match('~^application/json(?:\s*;|$)~i', $response->getHeaderLine('Content-Type'))
+			]
+		);
+		$response = $client->get( self::ENDPOINT );
+		if ( $response->getStatusCode() !== 200
+			|| !preg_match( '~^application/json(?:\s*;|$)~i', $response->getHeaderLine( 'Content-Type' ) )
 		) {
-			throw new RuntimeException('Unexpected Gatsby HTTP status or content type.');
+			throw new RuntimeException( 'Unexpected Gatsby HTTP status or content type.' );
 		}
 
-		return $this->extract_response((string) $response->getBody());
+		return $this->extract_response( (string) $response->getBody() );
 	}
 
 	/**
@@ -81,20 +83,20 @@ final class Scraper {
 	 * @throws RuntimeException If page identity, content, or notice structure is unexpected.
 	 */
 	public function extract_response(string $response): array {
-		$data = json_decode($response, true, 512, JSON_THROW_ON_ERROR);
+		$data = json_decode( $response, true, 512, JSON_THROW_ON_ERROR );
 		$edges = $data['result']['data']['page']['edges'] ?? null;
-		if (($data['path'] ?? null) !== '/reroutes/'
-			|| !is_array($edges) || count($edges) !== 1
+		if ( ($data['path'] ?? null) !== '/reroutes/'
+			|| !is_array( $edges ) || count( $edges ) !== 1
 			|| ($edges[0]['node']['title'] ?? null) !== 'Reroutes'
 		) {
-			throw new RuntimeException('Unexpected Gatsby reroutes response structure.');
+			throw new RuntimeException( 'Unexpected Gatsby reroutes response structure.' );
 		}
 		$html = $edges[0]['node']['content'] ?? null;
-		if (!is_string($html) || trim($html) === '') {
-			throw new RuntimeException('Missing Gatsby reroutes HTML content.');
+		if ( !is_string( $html ) || trim( $html ) === '' ) {
+			throw new RuntimeException( 'Missing Gatsby reroutes HTML content.' );
 		}
 
-		return $this->extract($html);
+		return $this->extract( $html );
 	}
 
 	/**
@@ -111,10 +113,10 @@ final class Scraper {
 	 * @throws RuntimeException If markup, category order, empty messages, or titles are ambiguous or invalid.
 	 */
 	public function extract(string $html): array {
-		$document = HTMLDocument::createFromString($html, LIBXML_NOERROR, 'UTF-8');
-		$body = $document->querySelector('body');
-		if ($body === null) {
-			throw new RuntimeException('Missing HTML body.');
+		$document = HTMLDocument::createFromString( $html, LIBXML_NOERROR, 'UTF-8' );
+		$body = $document->querySelector( 'body' );
+		if ( $body === null ) {
+			throw new RuntimeException( 'Missing HTML body.' );
 		}
 		$notices = [];
 		$seen = [];
@@ -124,20 +126,20 @@ final class Scraper {
 		$current = null;
 		$finished = false;
 
-		foreach ($body->childNodes as $block) {
-			if ($block instanceof Text && trim($block->textContent) !== '' && $category !== null) {
-				throw new RuntimeException('Unexpected unwrapped text in notice section.');
+		foreach ( $body->childNodes as $block ) {
+			if ( $block instanceof Text && trim( $block->textContent ) !== '' && $category !== null ) {
+				throw new RuntimeException( 'Unexpected unwrapped text in notice section.' );
 			}
-			if (!$block instanceof Element) {
+			if ( !$block instanceof Element ) {
 				continue;
 			}
-			$tag = strtolower($block->tagName);
-			if ($tag === 'h3') {
-				$this->finish_notice($current, $notices);
-				$heading = self::text($block->textContent);
-				$expected = array_keys(self::CATEGORIES)[count($seen)] ?? null;
-				if ($heading !== $expected) {
-					throw new RuntimeException('Unexpected category heading or order: ' . $heading);
+			$tag = strtolower( $block->tagName );
+			if ( $tag === 'h3' ) {
+				$this->finish_notice( $current, $notices );
+				$heading = self::text( $block->textContent );
+				$expected = array_keys( self::CATEGORIES )[count( $seen )] ?? null;
+				if ( $heading !== $expected ) {
+					throw new RuntimeException( 'Unexpected category heading or order: ' . $heading );
 				}
 				$category = self::CATEGORIES[$heading];
 				$seen[] = $heading;
@@ -145,62 +147,62 @@ final class Scraper {
 				$empty[$category] = false;
 				continue;
 			}
-			if ($tag === 'hr') {
-				$this->finish_notice($current, $notices);
-				if ($category === 'reopening') {
+			if ( $tag === 'hr' ) {
+				$this->finish_notice( $current, $notices );
+				if ( $category === 'reopening' ) {
 					$finished = true;
 				}
 				$category = null;
 				continue;
 			}
-			if ($category === null) {
-				if ($seen !== [] && !$finished) {
-					throw new RuntimeException('Unexpected content between category sections.');
+			if ( $category === null ) {
+				if ( $seen !== [] && !$finished ) {
+					throw new RuntimeException( 'Unexpected content between category sections.' );
 				}
-				if ($finished && ($tag !== 'p'
-					|| !str_starts_with(self::text($block->textContent), 'Sign up for alerts'))
+				if ( $finished && ($tag !== 'p'
+					|| !str_starts_with( self::text( $block->textContent ), 'Sign up for alerts' ))
 				) {
-					throw new RuntimeException('Unexpected content after notice sections.');
+					throw new RuntimeException( 'Unexpected content after notice sections.' );
 				}
 				continue;
 			}
-			if (!in_array($tag, ['p', 'ul', 'ol'], true)) {
-				throw new RuntimeException('Unexpected notice block: ' . $tag);
+			if ( !in_array( $tag, ['p', 'ul', 'ol'], true ) ) {
+				throw new RuntimeException( 'Unexpected notice block: ' . $tag );
 			}
-			$title = $tag === 'p' ? $this->title($block) : null;
-			if ($title !== null) {
-				if ($empty[$category]) {
-					throw new RuntimeException('Notice found in a section marked empty.');
+			$title = $tag === 'p' ? $this->title( $block ) : null;
+			if ( $title !== null ) {
+				if ( $empty[$category] ) {
+					throw new RuntimeException( 'Notice found in a section marked empty.' );
 				}
-				$this->finish_notice($current, $notices);
+				$this->finish_notice( $current, $notices );
 				$current = ['category' => $category, 'title' => $title, 'html' => ''];
 				$counts[$category]++;
-			} elseif (preg_match('/^There are no (reroutes|closures|reopenings) at this time\.$/i', self::text($block->textContent), $matches)) {
-				if ($tag !== 'p' || $counts[$category] !== 0 || $empty[$category]
-					|| self::CATEGORIES[ucfirst(strtolower($matches[1]))] !== $category
+			} elseif ( preg_match( '/^There are no (reroutes|closures|reopenings) at this time\.$/i', self::text( $block->textContent ), $matches ) ) {
+				if ( $tag !== 'p' || $counts[$category] !== 0 || $empty[$category]
+					|| self::CATEGORIES[ucfirst( strtolower( $matches[1] ) )] !== $category
 				) {
-					throw new RuntimeException('Conflicting empty-category message.');
+					throw new RuntimeException( 'Conflicting empty-category message.' );
 				}
 				$empty[$category] = true;
 				continue;
-			} elseif ($current === null) {
-				throw new RuntimeException('Notice content without a recognized title.');
+			} elseif ( $current === null ) {
+				throw new RuntimeException( 'Notice content without a recognized title.' );
 			}
-			$current['html'] .= $document->saveHtml($block) . "\n";
+			$current['html'] .= $document->saveHtml( $block ) . "\n";
 		}
-		$this->finish_notice($current, $notices);
+		$this->finish_notice( $current, $notices );
 
-		if ($seen !== array_keys(self::CATEGORIES)) {
-			throw new RuntimeException('Missing required category headings.');
+		if ( $seen !== array_keys( self::CATEGORIES ) ) {
+			throw new RuntimeException( 'Missing required category headings.' );
 		}
-		foreach ($counts as $name => $count) {
-			if ($count === 0 && !$empty[$name]) {
-				throw new RuntimeException('Empty section without an explicit empty message: ' . $name);
+		foreach ( $counts as $name => $count ) {
+			if ( $count === 0 && !$empty[$name] ) {
+				throw new RuntimeException( 'Empty section without an explicit empty message: ' . $name );
 			}
 		}
-		$titles = array_map(fn (array $notice): string => self::key($notice['title']), $notices);
-		if (count($titles) !== count(array_unique($titles))) {
-			throw new RuntimeException('Duplicate notice titles require manual reconciliation.');
+		$titles = array_map( fn (array $notice): string => self::key( $notice['title'] ), $notices );
+		if ( count( $titles ) !== count( array_unique( $titles ) ) ) {
+			throw new RuntimeException( 'Duplicate notice titles require manual reconciliation.' );
 		}
 
 		return $notices;
@@ -218,21 +220,21 @@ final class Scraper {
 	 */
 	private function title(Element $paragraph): ?string {
 		$first = $paragraph->firstChild;
-		while ($first instanceof Text && trim($first->textContent) === '') {
+		while ( $first instanceof Text && trim( $first->textContent ) === '' ) {
 			$first = $first->nextSibling;
 		}
-		if (!$first instanceof Element) {
+		if ( !$first instanceof Element ) {
 			return null;
 		}
-		if (strtolower($first->tagName) === 'a') {
+		if ( strtolower( $first->tagName ) === 'a' ) {
 			$first = $first->firstElementChild;
 		}
-		if (!$first instanceof Element || !in_array(strtolower($first->tagName), ['strong', 'b'], true)) {
+		if ( !$first instanceof Element || !in_array( strtolower( $first->tagName ), ['strong', 'b'], true ) ) {
 			return null;
 		}
-		$title = self::text($first->textContent);
-		if ($title === '') {
-			throw new RuntimeException('Empty notice title.');
+		$title = self::text( $first->textContent );
+		if ( $title === '' ) {
+			throw new RuntimeException( 'Empty notice title.' );
 		}
 
 		return $title;
@@ -252,28 +254,28 @@ final class Scraper {
 	 * @throws RuntimeException If sanitization leaves no notice text.
 	 */
 	private function finish_notice(?array &$current, array &$notices): void {
-		if ($current === null) {
+		if ( $current === null ) {
 			return;
 		}
-		$document = HTMLDocument::createFromString($current['html'], LIBXML_NOERROR, 'UTF-8');
-		foreach ($document->querySelectorAll('a[href]') as $link) {
-			$uri = UriResolver::resolve(new Uri(self::SOURCE_URL), new Uri($link->getAttribute('href')));
-			$link->setAttribute('href', (string) $uri);
+		$document = HTMLDocument::createFromString( $current['html'], LIBXML_NOERROR, 'UTF-8' );
+		foreach ( $document->querySelectorAll( 'a[href]' ) as $link ) {
+			$uri = UriResolver::resolve( new Uri( self::SOURCE_URL ), new Uri( $link->getAttribute( 'href' ) ) );
+			$link->setAttribute( 'href', (string) $uri );
 		}
-		$config = (new HtmlSanitizerConfig())->allowLinkSchemes(['http', 'https']);
-		foreach (['p', 'br', 'ul', 'ol', 'li', 'strong', 'b', 'em', 'i'] as $tag) {
-			$config = $config->allowElement($tag);
+		$config = (new HtmlSanitizerConfig())->allowLinkSchemes( ['http', 'https'] );
+		foreach ( ['p', 'br', 'ul', 'ol', 'li', 'strong', 'b', 'em', 'i'] as $tag ) {
+			$config = $config->allowElement( $tag );
 		}
-		$config = $config->allowElement('a', ['href', 'title']);
-		$sanitizer = new HtmlSanitizer($config);
-		$body = $document->querySelector('body');
+		$config = $config->allowElement( 'a', ['href', 'title'] );
+		$sanitizer = new HtmlSanitizer( $config );
+		$body = $document->querySelector( 'body' );
 		$fragment = '';
-		foreach ($body->childNodes as $child) {
-			$fragment .= $document->saveHtml($child);
+		foreach ( $body->childNodes as $child ) {
+			$fragment .= $document->saveHtml( $child );
 		}
-		$current['html'] = trim($sanitizer->sanitize($fragment));
-		if (trim(strip_tags($current['html'])) === '') {
-			throw new RuntimeException('Sanitization produced an empty notice.');
+		$current['html'] = trim( $sanitizer->sanitize( $fragment ) );
+		if ( trim( strip_tags( $current['html'] ) ) === '' ) {
+			throw new RuntimeException( 'Sanitization produced an empty notice.' );
 		}
 		$notices[] = $current;
 		$current = null;
@@ -301,27 +303,27 @@ final class Scraper {
 	public function reconcile(array $previous, array $extracted, string $now): array {
 		$notices = $previous['notices'];
 		$by_title = [];
-		foreach ($notices as $index => $notice) {
-			$key = self::key($notice['title']);
-			if (isset($by_title[$key])) {
-				throw new RuntimeException('Ambiguous persisted notice titles.');
+		foreach ( $notices as $index => $notice ) {
+			$key = self::key( $notice['title'] );
+			if ( isset( $by_title[$key] ) ) {
+				throw new RuntimeException( 'Ambiguous persisted notice titles.' );
 			}
 			$by_title[$key] = $index;
 		}
 		$visible = [];
-		foreach ($extracted as $notice) {
-			$key = self::key($notice['title']);
-			if (isset($visible[$key])) {
-				throw new RuntimeException('Duplicate extracted notice title.');
+		foreach ( $extracted as $notice ) {
+			$key = self::key( $notice['title'] );
+			if ( isset( $visible[$key] ) ) {
+				throw new RuntimeException( 'Duplicate extracted notice title.' );
 			}
 			$visible[$key] = true;
 			$notice['source_url'] = self::SOURCE_URL;
-			$notice['content_hash'] = hash('sha256', $notice['html']);
-			if (isset($by_title[$key])) {
+			$notice['content_hash'] = hash( 'sha256', $notice['html'] );
+			if ( isset( $by_title[$key] ) ) {
 				$index = $by_title[$key];
 				$stored = $notices[$index];
 				$changed = false;
-				foreach ($notice as $field => $value) {
+				foreach ( $notice as $field => $value ) {
 					$changed = $changed || $stored[$field] !== $value;
 				}
 				$notice['id'] = $stored['id'];
@@ -335,12 +337,12 @@ final class Scraper {
 				$notices[] = $notice;
 			}
 		}
-		foreach ($notices as &$notice) {
-			if (!isset($visible[self::key($notice['title'])]) && !isset($notice['removed_at'])) {
+		foreach ( $notices as &$notice ) {
+			if ( !isset( $visible[self::key( $notice['title'] )] ) && !isset( $notice['removed_at'] ) ) {
 				$notice['removed_at'] = $now;
 			}
 		}
-		unset($notice);
+		unset( $notice );
 
 		return ['schema_version' => 1, 'notices' => $notices];
 	}
@@ -360,23 +362,23 @@ final class Scraper {
 	 * @throws \DateMalformedStringException If a timestamp cannot be parsed after schema validation.
 	 */
 	public function validate(array $data, string $schema_path): void {
-		$schema = json_decode(self::read($schema_path), false, 512, JSON_THROW_ON_ERROR);
-		$object = json_decode(json_encode($data, JSON_THROW_ON_ERROR), false, 512, JSON_THROW_ON_ERROR);
-		$result = (new Validator())->validate($object, $schema);
-		if (!$result->isValid()) {
-			throw new RuntimeException('Notice data failed JSON Schema validation.');
+		$schema = json_decode( self::read( $schema_path ), false, 512, JSON_THROW_ON_ERROR );
+		$object = json_decode( json_encode( $data, JSON_THROW_ON_ERROR ), false, 512, JSON_THROW_ON_ERROR );
+		$result = (new Validator())->validate( $object, $schema );
+		if ( !$result->isValid() ) {
+			throw new RuntimeException( 'Notice data failed JSON Schema validation.' );
 		}
 		$ids = [];
-		foreach ($data['notices'] as $notice) {
-			if (isset($ids[$notice['id']]) || hash('sha256', $notice['html']) !== $notice['content_hash']) {
-				throw new RuntimeException('Duplicate notice ID or incorrect content hash.');
+		foreach ( $data['notices'] as $notice ) {
+			if ( isset( $ids[$notice['id']] ) || hash( 'sha256', $notice['html'] ) !== $notice['content_hash'] ) {
+				throw new RuntimeException( 'Duplicate notice ID or incorrect content hash.' );
 			}
 			$ids[$notice['id']] = true;
-			$first_seen = new DateTimeImmutable($notice['first_seen_at']);
-			if (new DateTimeImmutable($notice['updated_at']) < $first_seen
-				|| (isset($notice['removed_at']) && new DateTimeImmutable($notice['removed_at']) < $first_seen)
+			$first_seen = new DateTimeImmutable( $notice['first_seen_at'] );
+			if ( new DateTimeImmutable( $notice['updated_at'] ) < $first_seen
+				|| (isset( $notice['removed_at'] ) && new DateTimeImmutable( $notice['removed_at'] ) < $first_seen)
 			) {
-				throw new RuntimeException('Notice timestamps are out of order.');
+				throw new RuntimeException( 'Notice timestamps are out of order.' );
 			}
 		}
 	}
@@ -395,25 +397,25 @@ final class Scraper {
 	 * @throws RuntimeException If reading, directory creation, or atomic persistence fails.
 	 */
 	public function save(array $data, string $path): bool {
-		$json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) . "\n";
-		if (is_file($path) && self::read($path) === $json) {
+		$json = json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR ) . "\n";
+		if ( is_file( $path ) && self::read( $path ) === $json ) {
 			return false;
 		}
-		$directory = dirname($path);
-		if (!is_dir($directory) && !mkdir($directory, 0777, true) && !is_dir($directory)) {
-			throw new RuntimeException('Cannot create data directory.');
+		$directory = dirname( $path );
+		if ( !is_dir( $directory ) && !mkdir( $directory, 0777, true ) && !is_dir( $directory ) ) {
+			throw new RuntimeException( 'Cannot create data directory.' );
 		}
-		$temporary = tempnam($directory, '.notices-');
-		if ($temporary === false) {
-			throw new RuntimeException('Cannot create temporary data file.');
+		$temporary = tempnam( $directory, '.notices-' );
+		if ( $temporary === false ) {
+			throw new RuntimeException( 'Cannot create temporary data file.' );
 		}
 		try {
-			if (file_put_contents($temporary, $json, LOCK_EX) !== strlen($json) || !rename($temporary, $path)) {
-				throw new RuntimeException('Cannot atomically save notice data.');
+			if ( file_put_contents( $temporary, $json, LOCK_EX ) !== strlen( $json ) || !rename( $temporary, $path ) ) {
+				throw new RuntimeException( 'Cannot atomically save notice data.' );
 			}
 		} finally {
-			if (is_file($temporary)) {
-				unlink($temporary);
+			if ( is_file( $temporary ) ) {
+				unlink( $temporary );
 			}
 		}
 
@@ -428,9 +430,9 @@ final class Scraper {
 	 * @throws RuntimeException If the file cannot be read.
 	 */
 	public static function read(string $path): string {
-		$contents = file_get_contents($path);
-		if ($contents === false) {
-			throw new RuntimeException('Cannot read ' . $path);
+		$contents = file_get_contents( $path );
+		if ( $contents === false ) {
+			throw new RuntimeException( 'Cannot read ' . $path );
 		}
 
 		return $contents;
@@ -443,7 +445,7 @@ final class Scraper {
 	 * @return string Normalized text, or an empty string for whitespace-only input.
 	 */
 	private static function text(string $text): string {
-		return trim(preg_replace('/\s+/u', ' ', str_replace("\u{00a0}", ' ', $text)));
+		return trim( preg_replace( '/\s+/u', ' ', str_replace( "\u{00a0}", ' ', $text ) ) );
 	}
 
 	/**
@@ -456,8 +458,8 @@ final class Scraper {
 	 * @return string Lowercase normalized title used for matching and duplicate detection.
 	 */
 	private static function key(string $title): string {
-		$title = preg_replace('/\p{P}+/u', '', $title);
-		return mb_strtolower(self::text($title), 'UTF-8');
+		$title = preg_replace( '/\p{P}+/u', '', $title );
+		return mb_strtolower( self::text( $title ), 'UTF-8' );
 	}
 
 	/**
@@ -469,12 +471,12 @@ final class Scraper {
 	 * @throws \Random\RandomException If secure random bytes cannot be generated.
 	 */
 	private static function uuid(): string {
-		$bytes = random_bytes(16);
-		$bytes[6] = chr((ord($bytes[6]) & 0x0f) | 0x40);
-		$bytes[8] = chr((ord($bytes[8]) & 0x3f) | 0x80);
-		$hex = bin2hex($bytes);
+		$bytes = random_bytes( 16 );
+		$bytes[6] = chr( (ord( $bytes[6] ) & 0x0f) | 0x40 );
+		$bytes[8] = chr( (ord( $bytes[8] ) & 0x3f) | 0x80 );
+		$hex = bin2hex( $bytes );
 
-		return substr($hex, 0, 8) . '-' . substr($hex, 8, 4) . '-' . substr($hex, 12, 4)
-			. '-' . substr($hex, 16, 4) . '-' . substr($hex, 20);
+		return substr( $hex, 0, 8 ) . '-' . substr( $hex, 8, 4 ) . '-' . substr( $hex, 12, 4 )
+			. '-' . substr( $hex, 16, 4 ) . '-' . substr( $hex, 20 );
 	}
 }
