@@ -348,6 +348,38 @@ final class Scraper {
 	}
 
 	/**
+	 * Describe changed page content on known, currently visible notices as Actions warnings.
+	 *
+	 * Matches reconciled records by UUID and compares title, category, and sanitized
+	 * HTML. New records, removals, and timestamp-only changes do not produce warnings.
+	 * Escapes workflow-command data so notice text cannot inject additional commands.
+	 *
+	 * @param  array{schema_version: int, notices: list<array<string, string>>} $previous Validated archive before scraping.
+	 * @param  array{schema_version: int, notices: list<array<string, string>>} $current  Validated reconciled archive.
+	 * @return list<string> Escaped ::warning:: annotations, one per changed known notice.
+	 */
+	public function content_change_warnings(array $previous, array $current): array {
+		$by_id = array_column( $previous['notices'], null, 'id' );
+		$warnings = [];
+		foreach ( $current['notices'] as $notice ) {
+			if ( isset( $notice['removed_at'] ) || !isset( $by_id[$notice['id']] ) ) {
+				continue;
+			}
+			$changed_fields = [];
+			foreach ( ['title', 'category', 'html'] as $field ) {
+				if ( $notice[$field] !== $by_id[$notice['id']][$field] ) {
+					$changed_fields[] = $field;
+				}
+			if ( $changed_fields === [] ) {
+				continue;
+			}
+			$message = 'Known notice changed: "' . $notice['title'] . '" (' . $notice['id'] . '); fields: ' . implode( ', ', $changed_fields ) . '. Published RSS items remain unchanged.';
+			$warnings[] = '::warning::' . str_replace( ['%', "\r", "\n"], ['%25', '%0D', '%0A'], $message );
+		}
+		return $warnings;
+	}
+
+	/**
 	 * Check JSON Schema conformance, unique IDs, HTML hashes, and timestamp ordering.
 	 *
 	 * Both updated_at and removed_at, when present, must be at or after first_seen_at.

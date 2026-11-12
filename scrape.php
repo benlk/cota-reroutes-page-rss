@@ -6,6 +6,7 @@
  * A missing archive starts empty; an unreadable or invalid archive aborts the run.
  * Missing notices are retained with removal timestamps, not treated as reopenings.
  * Success prints visible and retained counts and whether file contents changed.
+ * Changed page content on known notices emits GitHub Actions warning annotations.
  * Failures print to STDERR and exit with status 1. Concurrent runs must be serialized.
  */
 
@@ -34,6 +35,10 @@ try {
 	$scraper->validate( $data, $root . '/reroutes.schema.json' );
 
 	$changed = $scraper->save( $data, $path );
+
+	foreach ( $scraper->content_change_warnings( $previous, $data ) as $warning ) {
+		fwrite( STDOUT, $warning . "\n" );
+	}
 
 	printf( "%d visible notices; %d retained records; %s.\n", count( $extracted ), count( $data['notices'] ), $changed ? 'data updated' : 'no changes' );
 

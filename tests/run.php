@@ -11,6 +11,7 @@
 
 declare(strict_types=1);
 
+use Cota\Feed;
 use Cota\Scraper;
 
 require dirname( __DIR__ ) . '/vendor/autoload.php';
@@ -133,6 +134,73 @@ final class ScraperTests {
 		$this->notices = $this->scraper->extract_response( $response );
 		$this->data    = $this->scraper->reconcile( self::EMPTY_STATE, $this->notices, self::FIRST );
 		$this->scraper->validate( $this->data, $this->schema );
+	}
+
+	/**
+	 * Verify changed HTML on a matched notice produces one identifiable Actions warning.
+	 *
+	 * @return void
+	 * @throws Throwable If a content edit is missed or produces incorrect annotations.
+	 */
+	private function test_content_change_warning(): void {
+		$changed = $this->notices;
+		$changed[0]['html'] .= '<p>Changed stop instructions.</p>';
+		$data = $this->scraper->reconcile( $this->data, $changed, self::LATER );
+		$warnings = $this->scraper->content_change_warnings( $this->data, $data );
+		check( count( $warnings ) === 1, 'Warn once per changed known notice.' );
+		check( str_starts_with( $warnings[0], '::warning::' ), 'Use a GitHub Actions warning annotation.' );
+		check( str_contains( $warnings[0], $this->data['notices'][0]['id'] ), 'Identify the changed notice by UUID.' );
+		check( str_contains( $warnings[0], $changed[0]['title'] ), 'Include the notice title.' );
+		check( str_contains( $warnings[0], 'fields: html' ), 'Name the changed page field.' );
+		check( $this->scraper->content_change_warnings( $data, $data ) === [], 'Do not warn again for already stored changes.' );
+	}
+
+	/**
+	 * Verify title and category edits on an existing UUID produce a single combined warning.
+	 *
+	 * @return void
+	 * @throws Throwable If page-field edits are missed or create multiple warnings per item.
+	 */
+	private function test_title_and_category_change_warning(): void {
+		$changed = $this->notices;
+		$changed[0]['title'] = 'Nov 16 Improvements';
+		$changed[0]['category'] = 'closure';
+		$data = $this->scraper->reconcile( $this->data, $changed, self::LATER );
+		$warnings = $this->scraper->content_change_warnings( $this->data, $data );
+		check( count( $warnings ) === 1, 'Combine changed fields into one warning per notice.' );
+		check( str_contains( $warnings[0], 'fields: title, category' ), 'Identify title and category changes.' );
+	}
+
+	/**
+	 * Verify unchanged notices, additions, and removals do not produce content-change warnings.
+	 *
+	 * @return void
+	 * @throws Throwable If lifecycle changes are mistaken for page-content edits.
+	 */
+	private function test_notice_lifecycle_does_not_warn(): void {
+		check( $this->scraper->content_change_warnings( $this->data, $this->data ) === [], 'Unchanged notices must not warn.' );
+		check( $this->scraper->content_change_warnings( self::EMPTY_STATE, $this->data ) === [], 'New notices must not warn.' );
+		$removed = $this->scraper->reconcile( $this->data, array_slice( $this->notices, 1 ), self::LATER );
+		check( $this->scraper->content_change_warnings( $this->data, $removed ) === [], 'Removals must not warn.' );
+		check( $this->scraper->content_change_warnings( $removed, $this->data ) === [], 'Unchanged reappearances must not warn.' );
+		$metadata = $this->data;
+		$metadata['notices'][0]['updated_at'] = self::LATER;
+		check( $this->scraper->content_change_warnings( $this->data, $metadata ) === [], 'Timestamp-only changes must not warn.' );
+	}
+
+	/**
+	 * Verify notice text cannot inject extra GitHub Actions workflow commands into warnings.
+	 *
+	 * @return void
+	 * @throws RuntimeException If percent signs or line breaks are not command-escaped.
+	 */
+	private function test_content_warning_escapes_workflow_commands(): void {
+		$data = $this->data;
+		$data['notices'][0]['title'] = "Road 50%\r\n::error::not a command";
+		$warnings = $this->scraper->content_change_warnings( $this->data, $data );
+		check( count( $warnings ) === 1, 'Emit one warning for the changed title.' );
+		check( str_contains( $warnings[0], '50%25%0D%0A::error::' ), 'Escape workflow-command data.' );
+		check( !str_contains( $warnings[0], "\r" ) && !str_contains( $warnings[0], "\n" ), 'Keep warning annotations on one physical line.' );
 	}
 
 	/**
@@ -443,6 +511,362 @@ final class ScraperTests {
 		$bad = $this->data;
 		$bad['notices'][0]['extra'] = true;
 		rejects( fn () => $this->scraper->validate( $bad, $this->schema ), 'Reject unknown fields.' );
+	}
+
+	/**
+	 * Render a feed at a fixed time and parse it for RSS assertions.
+	 *
+	 * @param  array{schema_version: int, notices: list<array<string, string>>} $data Validated notice archive.
+	 * @param  string                                                           $now  Current date-time for the removal window.
+	 * @return DOMXPath XPath evaluator for the parsed RSS document.
+	 * @throws Throwable If generation, XML parsing, or the well-formedness assertion fails.
+	 */
+	private function feed_document(array $data, string $now = self::LATER): DOMXPath {
+		$xml = (new Feed())->generate( $data, new DateTimeImmutable( $now ) );
+		$document = new DOMDocument();
+		check( $document->loadXML( $xml, LIBXML_NONET ), 'RSS must be well-formed XML.' );
+		return new DOMXPath( $document );
+	}
+
+	/**
+	 * Verify each archived notice produces an addition with its original first-seen date.
+	 *
+	 * @return void
+	 * @throws Throwable If RSS metadata, item counts, dates, or GUIDs are incorrect.
+	 */
+	private function test_feed_addition_events(): void {
+		$feed = $this->feed_document( $this->data );
+		check( $feed->evaluate( 'string(/rss/@version)' ) === '2.0', 'Generate RSS 2.0.' );
+		check( $feed->evaluate( 'count(/rss/channel/title | /rss/channel/link | /rss/channel/description)' ) === 3.0, 'Include required channel metadata.' );
+		check( $feed->evaluate( 'count(/rss/channel/item[category="added"])' ) === 3.0, 'Include additions for every notice category.' );
+		check( $feed->evaluate( 'count(/rss/channel/item[category="removed"])' ) === 0.0, 'Visible notices have no removal events.' );
+		check( $feed->evaluate( 'string(/rss/channel/item/pubDate)' ) === (new DateTimeImmutable( self::FIRST ))->format( DATE_RSS ), 'Date additions by first observation, not generation.' );
+		check( $feed->evaluate( 'string(/rss/channel/item/guid/@isPermaLink)' ) === 'false', 'Event GUIDs are identities, not URLs.' );
+	}
+
+	/**
+	 * Verify a removal observed now produces a distinct event before older additions.
+	 *
+	 * @return void
+	 * @throws Throwable If a current removal is omitted, misdated, or described as reopening.
+	 */
+	private function test_feed_current_removal(): void {
+		$data = $this->data;
+		$data['notices'][0]['removed_at'] = self::LATER;
+		$feed = $this->feed_document( $data );
+		check( $feed->evaluate( 'count(/rss/channel/item)' ) === 4.0, 'Retain addition history alongside a current removal.' );
+		check( $feed->evaluate( 'string(/rss/channel/item[1]/category[2])' ) === 'removed', 'Order events newest first.' );
+		check( $feed->evaluate( 'string(/rss/channel/item[1]/pubDate)' ) === (new DateTimeImmutable( self::LATER ))->format( DATE_RSS ), 'Date removals by removed_at.' );
+		check( str_contains( $feed->evaluate( 'string(/rss/channel/item[1]/description)' ), 'does not imply reopening' ), 'Describe removal as absence, not reopening.' );
+		$guids = array_map(
+			static fn (DOMNode $node): string => $node->textContent,
+			iterator_to_array( $feed->query( '/rss/channel/item/guid' ) )
+		);
+		check( count( $guids ) === count( array_unique( $guids ) ), 'Addition and removal GUIDs must be distinct.' );
+	}
+
+	/**
+	 * Verify the fifteen-minute removal boundary is inclusive.
+	 *
+	 * @return void
+	 * @throws Throwable If a removal exactly fifteen minutes old is omitted.
+	 */
+	private function test_feed_removal_at_cutoff(): void {
+		$data = $this->data;
+		$data['notices'][0]['removed_at'] = '2026-11-12T11:45:00Z';
+		$feed = $this->feed_document( $data );
+		check( $feed->evaluate( 'count(/rss/channel/item[category="removed"])' ) === 1.0, 'Include removal at the fifteen-minute boundary.' );
+	}
+
+	/**
+	 * Verify removals older than fifteen minutes are excluded without losing additions.
+	 *
+	 * @return void
+	 * @throws Throwable If an expired removal remains in the feed.
+	 */
+	private function test_feed_old_removal_excluded(): void {
+		$data = $this->data;
+		$data['notices'][0]['removed_at'] = '2026-11-12T11:44:59Z';
+		$feed = $this->feed_document( $data );
+		check( $feed->evaluate( 'count(/rss/channel/item[category="removed"])' ) === 0.0, 'Exclude removal older than fifteen minutes.' );
+		check( $feed->evaluate( 'count(/rss/channel/item[category="added"])' ) === 3.0, 'Keep historical addition events for removed notices.' );
+	}
+
+	/**
+	 * Verify future removal timestamps do not produce premature events.
+	 *
+	 * @return void
+	 * @throws Throwable If a future removal appears in the feed.
+	 */
+	private function test_feed_future_removal_excluded(): void {
+		$data = $this->data;
+		$data['notices'][0]['removed_at'] = '2026-11-12T12:00:01Z';
+		$feed = $this->feed_document( $data );
+		check( $feed->evaluate( 'count(/rss/channel/item[category="removed"])' ) === 0.0, 'Exclude removal timestamps in the future.' );
+	}
+
+	/**
+	 * Verify removal-window comparisons honor timestamp offsets rather than clock text.
+	 *
+	 * @return void
+	 * @throws Throwable If an equivalent offset timestamp is filtered or serialized incorrectly.
+	 */
+	private function test_feed_removal_timezone(): void {
+		$data = $this->data;
+		$data['notices'][0]['removed_at'] = '2026-11-12T07:55:00-04:00';
+		$feed = $this->feed_document( $data );
+		check( $feed->evaluate( 'count(/rss/channel/item[category="removed"])' ) === 1.0, 'Compare removal instants across offsets.' );
+		check( $feed->evaluate( 'string(/rss/channel/item[category="removed"]/pubDate)' ) === 'Thu, 12 Nov 2026 11:55:00 +0000', 'Serialize RSS dates in UTC.' );
+	}
+
+	/**
+	 * Verify XML escaping preserves HTML, special characters, and link query strings.
+	 *
+	 * @return void
+	 * @throws Throwable If XML parsing changes or corrupts RSS text values.
+	 */
+	private function test_feed_xml_escaping(): void {
+		$data = $this->data;
+		$data['notices'] = [$data['notices'][0]];
+		$data['notices'][0]['title'] = 'Road & rail <updates>';
+		$data['notices'][0]['source_url'] = 'https://cota.com/reroutes/?line=1&stop=2';
+		$data['notices'][0]['html'] = '<p>Road &amp; rail: ]]&gt;</p>';
+		$data['notices'][0]['content_hash'] = hash( 'sha256', $data['notices'][0]['html'] );
+		$this->scraper->validate( $data, $this->schema );
+		$feed = $this->feed_document( $data );
+		check( $feed->evaluate( 'string(/rss/channel/item/title)' ) === 'Added: Road & rail <updates>', 'Escape titles as XML text.' );
+		check( $feed->evaluate( 'string(/rss/channel/item/link)' ) === $data['notices'][0]['source_url'], 'Preserve URL query parameters.' );
+		check( str_ends_with( $feed->evaluate( 'string(/rss/channel/item/description)' ), $data['notices'][0]['html'] ), 'Preserve sanitized HTML inside the description text.' );
+	}
+
+	/**
+	 * Verify content edits keep addition GUIDs and original publication dates stable.
+	 *
+	 * @return void
+	 * @throws Throwable If an edit looks like a new addition to an RSS reader.
+	 */
+	private function test_feed_addition_identity_stable(): void {
+		$before = $this->feed_document( $this->data );
+		$data = $this->data;
+		$data['notices'][0]['title'] .= ' updated';
+		$data['notices'][0]['updated_at'] = self::LATER;
+		$after = $this->feed_document( $data );
+		check( $before->evaluate( 'string(/rss/channel/item/guid)' ) === $after->evaluate( 'string(/rss/channel/item/guid)' ), 'Content edits must not change addition GUIDs.' );
+		check( $before->evaluate( 'string(/rss/channel/item/pubDate)' ) === $after->evaluate( 'string(/rss/channel/item/pubDate)' ), 'Content edits must not redate additions.' );
+		$feed = new Feed();
+		check( $feed->generate( $this->data, new DateTimeImmutable( self::LATER ) ) === $feed->generate( $this->data, new DateTimeImmutable( self::LATEST ) ), 'Generation time alone must not rewrite unchanged additions.' );
+	}
+
+	/**
+	 * Verify a later removal of the same notice has a different removal-event GUID.
+	 *
+	 * @return void
+	 * @throws Throwable If repeated removal observations cannot be distinguished.
+	 */
+	private function test_feed_repeated_removal_identity(): void {
+		$data = $this->data;
+		$data['notices'][0]['removed_at'] = self::LATER;
+		$before = $this->feed_document( $data );
+		$data['notices'][0]['removed_at'] = self::LATEST;
+		$after = $this->feed_document( $data, self::LATEST );
+		check( $before->evaluate( 'string(/rss/channel/item[category="removed"]/guid)' ) !== $after->evaluate( 'string(/rss/channel/item[category="removed"]/guid)' ), 'Distinct removal observations need distinct GUIDs.' );
+	}
+
+	/**
+	 * Verify an empty archive still produces a valid RSS channel without items.
+	 *
+	 * @return void
+	 * @throws Throwable If an empty feed cannot be parsed or contains events.
+	 */
+	private function test_feed_empty_archive(): void {
+		$feed = $this->feed_document( self::EMPTY_STATE );
+		check( $feed->evaluate( 'count(/rss/channel)' ) === 1.0, 'Keep channel metadata in empty feeds.' );
+		check( $feed->evaluate( 'count(/rss/channel/item)' ) === 0.0, 'An empty archive has no events.' );
+	}
+
+	/**
+	 * Verify RSS persistence writes once and skips unchanged XML.
+	 *
+	 * @return void Removes the temporary file even when an assertion fails.
+	 * @throws Throwable If RSS persistence or an assertion fails.
+	 */
+	private function test_feed_persistence(): void {
+		$path = sys_get_temp_dir() . '/cota-feed-' . bin2hex( random_bytes( 8 ) ) . '.xml';
+		$feed = new Feed();
+		$now = new DateTimeImmutable( self::LATER );
+		try {
+			check( $feed->save( $this->data, $now, $path ), 'First RSS save writes data.' );
+			check( !$feed->save( $this->data, $now, $path ), 'Identical RSS saves do not rewrite data.' );
+			check( Scraper::read( $path ) === $feed->generate( $this->data, $now ), 'RSS output must match generated XML.' );
+		} finally {
+			if ( is_file( $path ) ) {
+				unlink( $path );
+			}
+		}
+	}
+
+	/**
+	 * Supply an isolated RSS path and clean it up after a persistence test.
+	 *
+	 * @param  callable(string): void $operation Test receiving a nonexistent temporary file path.
+	 * @return void Removes the file even when the test throws.
+	 * @throws Throwable If the test or temporary path generation fails.
+	 */
+	private function with_feed_file(callable $operation): void {
+		$path = sys_get_temp_dir() . '/cota-feed-' . bin2hex( random_bytes( 8 ) ) . '.xml';
+		try {
+			$operation( $path );
+		} finally {
+			if ( is_file( $path ) ) {
+				unlink( $path );
+			}
+		}
+	}
+
+	/**
+	 * Verify only new addition GUIDs are appended, preserving published item content and order.
+	 *
+	 * @return void
+	 * @throws Throwable If additions are duplicated or existing history is rewritten.
+	 */
+	private function test_feed_appends_new_additions(): void {
+		$this->with_feed_file(
+			function (string $path): void {
+				$feed = new Feed();
+				$now = new DateTimeImmutable( self::LATER );
+				$feed->save( $this->data, $now, $path );
+				$document = new DOMDocument();
+				check( $document->loadXML( Scraper::read( $path ), LIBXML_NONET ), 'Parse the initial RSS feed.' );
+				$original_item = $document->saveXML( $document->getElementsByTagName( 'item' )->item( 0 ) );
+				$new_notice = $this->notices[0];
+				$new_notice['title'] = 'A newly observed reroute';
+				$notices = [...$this->notices, $new_notice];
+				$data = $this->scraper->reconcile( $this->data, $notices, self::LATER );
+				$data['notices'][0]['title'] .= ' edited after publication';
+				check( $feed->save( $data, $now, $path ), 'A new addition must append an RSS item.' );
+				check( $document->loadXML( Scraper::read( $path ), LIBXML_NONET ), 'Parse the appended RSS feed.' );
+				$xpath = new DOMXPath( $document );
+				check( $xpath->evaluate( 'count(/rss/channel/item)' ) === 4.0, 'Append exactly one new item.' );
+				check( $xpath->evaluate( 'string(/rss/channel/item[last()]/title)' ) === 'Added: A newly observed reroute', 'Append new events after existing items.' );
+				check( $document->saveXML( $document->getElementsByTagName( 'item' )->item( 0 ) ) === $original_item, 'Published items must retain their content and order.' );
+				check( !$feed->save( $data, $now, $path ), 'Do not append an already published addition again.' );
+			} 
+		);
+	}
+
+	/**
+	 * Verify edits and an empty input archive cannot overwrite or delete published events.
+	 *
+	 * @return void
+	 * @throws Throwable If a save without new GUIDs changes existing file bytes.
+	 */
+	private function test_feed_keeps_published_content(): void {
+		$this->with_feed_file(
+			function (string $path): void {
+				$feed = new Feed();
+				$now = new DateTimeImmutable( self::LATER );
+				$feed->save( $this->data, $now, $path );
+				$original = Scraper::read( $path );
+				$data = $this->data;
+				$data['notices'][0]['title'] .= ' edited';
+				$data['notices'][0]['html'] .= '<p>Later details.</p>';
+				$data['notices'][0]['content_hash'] = hash( 'sha256', $data['notices'][0]['html'] );
+				check( !$feed->save( $data, $now, $path ), 'Content edits must not replace published items.' );
+				check( !$feed->save( self::EMPTY_STATE, $now, $path ), 'An empty archive must not erase published events.' );
+				check( Scraper::read( $path ) === $original, 'No new GUIDs means no file rewrite.' );
+			} 
+		);
+	}
+
+	/**
+	 * Verify eligible removal events append once and survive expiry and reappearance.
+	 *
+	 * @return void
+	 * @throws Throwable If a removal is duplicated or disappears from published history.
+	 */
+	private function test_feed_retains_removal_history(): void {
+		$this->with_feed_file(
+			function (string $path): void {
+				$feed = new Feed();
+				$now = new DateTimeImmutable( self::LATER );
+				$feed->save( $this->data, $now, $path );
+				$data = $this->data;
+				$data['notices'][0]['removed_at'] = self::LATER;
+				check( $feed->save( $data, $now, $path ), 'Append a newly observed removal.' );
+				$original = Scraper::read( $path );
+				$document = new DOMDocument();
+				check( $document->loadXML( $original, LIBXML_NONET ), 'Parse persisted removal history.' );
+				$xpath = new DOMXPath( $document );
+				check( $xpath->evaluate( 'count(/rss/channel/item[category="removed"])' ) === 1.0, 'Store exactly one removal event.' );
+				check( !$feed->save( $data, $now, $path ), 'Do not duplicate a removal within its window.' );
+				check( !$feed->save( $data, new DateTimeImmutable( self::LATEST ), $path ), 'Expiry must not delete a published removal.' );
+				check( !$feed->save( $this->data, new DateTimeImmutable( self::LATEST ), $path ), 'Reappearance must not erase the previous removal event.' );
+				check( Scraper::read( $path ) === $original, 'Removal history must remain byte-for-byte unchanged.' );
+			} 
+		);
+	}
+
+	/**
+	 * Verify a later removal of the same notice is appended alongside the earlier event.
+	 *
+	 * @return void
+	 * @throws Throwable If removal history is replaced or distinct observations are collapsed.
+	 */
+	private function test_feed_appends_repeated_removals(): void {
+		$this->with_feed_file(
+			function (string $path): void {
+				$feed = new Feed();
+				$data = $this->data;
+				$data['notices'][0]['removed_at'] = self::LATER;
+				$feed->save( $data, new DateTimeImmutable( self::LATER ), $path );
+				$data['notices'][0]['removed_at'] = self::LATEST;
+				check( $feed->save( $data, new DateTimeImmutable( self::LATEST ), $path ), 'Append a later removal observation.' );
+				$document = new DOMDocument();
+				check( $document->loadXML( Scraper::read( $path ), LIBXML_NONET ), 'Parse repeated removal history.' );
+				$xpath = new DOMXPath( $document );
+				check( $xpath->evaluate( 'count(/rss/channel/item[category="removed"])' ) === 2.0, 'Retain both removal events.' );
+				check( $xpath->evaluate( 'count(/rss/channel/item[category="added"])' ) === 3.0, 'Do not duplicate existing addition events.' );
+			} 
+		);
+	}
+
+	/**
+	 * Verify malformed XML and non-RSS documents are rejected without overwriting history.
+	 *
+	 * @return void
+	 * @throws Throwable If invalid existing content is replaced or accepted.
+	 */
+	private function test_feed_invalid_history_preserved(): void {
+		$this->with_feed_file(
+			function (string $path): void {
+				$feed = new Feed();
+				foreach ( ['', '<rss>', '<feed/>', '<rss version="2.0"><channel/><channel/></rss>'] as $xml ) {
+					  file_put_contents( $path, $xml );
+					  rejects( fn () => $feed->save( $this->data, new DateTimeImmutable( self::LATER ), $path ), 'Reject invalid RSS history.' );
+					  check( Scraper::read( $path ) === $xml, 'Invalid history must not be overwritten.' );
+				}
+			} 
+		);
+	}
+
+	/**
+	 * Verify existing items require unique nonempty GUIDs before deduplication.
+	 *
+	 * @return void
+	 * @throws Throwable If ambiguous event identity is accepted or overwritten.
+	 */
+	private function test_feed_invalid_history_guids_rejected(): void {
+		$this->with_feed_file(
+			function (string $path): void {
+				$feed = new Feed();
+				foreach ( ['<item/>', '<item><guid> </guid></item>', '<item><guid>x</guid><guid>y</guid></item>', '<item><guid>x</guid></item><item><guid>x</guid></item>'] as $items ) {
+					  $xml = '<rss version="2.0"><channel>' . $items . '</channel></rss>';
+					  file_put_contents( $path, $xml );
+					  rejects( fn () => $feed->save( $this->data, new DateTimeImmutable( self::LATER ), $path ), 'Reject missing or ambiguous GUIDs.' );
+					  check( Scraper::read( $path ) === $xml, 'Ambiguous history must not be overwritten.' );
+				}
+			} 
+		);
 	}
 
 	/**

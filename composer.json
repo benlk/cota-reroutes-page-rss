@@ -20,6 +20,7 @@
     "ext-dom": "*",
     "ext-mbstring": "*",
     "guzzlehttp/guzzle": "^7.9",
+    "league/commonmark": "^2.7",
     "opis/json-schema": "^2.4",
     "symfony/html-sanitizer": "^7.4"
   },
@@ -28,6 +29,12 @@
   },
   "scripts": {
     "scrape": "@php scrape.php",
+    "feed": "@php feed.php",
+    "build": [
+      "mkdir -p _site",
+      "@php index.php > _site/index.html",
+      "cp style.css data/feed.xml _site/"
+    ],
     "test": "@php tests/run.php",
 	"lint": [
 		"phpcs -s ."		],
