@@ -80,7 +80,7 @@
         },
         "removed_at": {
           "$ref": "#/$defs/timestamp",
-          "description": "Time the scraper first observed this notice missing from the source page during a successful, validated scrape, not the exact removal time or a reopening date. Omitted while visible; cleared if the notice reappears."
+          "description": "Time the scraper first observed this occurrence missing during a successful, validated scrape, not the exact removal time or a reopening date. Omitted for active occurrences and retained permanently once set. Reappearance creates a separate record with a new UUID."
         }
       }
     }

@@ -8,12 +8,13 @@
 
 Put that in your RSS feed reader.
 
-Two types of events appear in that feed:
+Three types of events appear in that feed:
 
-- **Added:** First observed on COTA's page, not necessarily newly published or effective that day.
+- **Added:** First observed on COTA's page, or observed again after removal. Not necessarily newly published or effective that day.
+- **Change:** A known notice was edited. The item includes labeled old and new content.
 - **Removed:** No longer listed. This does **not** mean a stop has reopened or normal service has resumed; it just means that the thing is no longer listed.
 
-The scrape powering this feed run dailyish, overnight, subject to GitHub delays and failures. Notices that appear and disappear between scrapes may be missed. Published items retain their original text in the feed; edit to text do not create update events in the feed. A changed title on a section may appear as a removal and addition.
+The scrape powering this feed runs dailyish, overnight, subject to GitHub delays and failures. Notices that appear and disappear between scrapes may be missed. Published items retain their original text; edits to matched notices create separate Change items. A title edit that prevents matching may still appear as a removal and addition.
 
 Direct bus service questions to [COTA](https://cota.com/contact/).
 
@@ -26,11 +27,12 @@ cota.com uses [Gatsby](https://www.gatsbyjs.com/), which publishes the reroutes 
 1. **Fetch:** A scheduled GitHub Action runs the PHP scraper, which reads the fragment at `result.data.page.edges[0].node.content`.
 2. **Extract:** The headings Reroutes, Closures, and Reopenings define categories. A paragraph beginning with bold text, optionally inside a link, starts a notice; subsequent paragraphs and lists belong to it. The scraper sanitizes the HTML and resolves relative links.
 3. **Compare:** Extracted notices are matched against [the archive](data/notices.json) by title:
-    - New notices receive a first-seen timestamp and a new GUID.
-	- Notices gone missing receive a `removed_at` timestamp
-	- Notices gone missing that then reappear have that removal marker cleared
+    - New notices receive a first-seen timestamp and a new GUID, and generate an "Added" feed item.
+	- Notices gone missing receive a `removed_at` timestamp, and generate a "Removed" feed item if the feed is generated within 15 mintes of the item being marked in the data set as removed.
+	- Reappearing notices create new records and Added feed items; previous records retain their removal timestamps.
+	- Notices whose contents are edited generate a "Change" item in the RSS feed, with the before and after and `updated_at` time.
 	- Unexpected markup or ambiguous titles abort the scrape rather than guess.
-4. **Append:** The RSS writer adds events whose GUIDs are not already in [the feed](data/feed.xml). Additions' feed items are dated with the first-seen timestamp. Feed items for removals are generated when the feed is generated within fifteen minutes of `removed_at`. Existing items are never rewritten, and content edits or reappearances do not create separate events.
+4. **Append:** During the same scrape command, the RSS writer adds unseen events to [the feed](data/feed.xml). Additions use the first-seen timestamp; changes include both snapshots and use `updated_at`. Removals are eligible within fifteen minutes of `removed_at`. Existing items are never rewritten. The archive advances only after feed publication succeeds.
 5. **Publish:** The scrape workflow commits changed data. After successful completion, the Pages workflow renders this README, copies the existing feed into the website build, and deploys it to GitHub Pages. Feed readers then discover new items by GUID.
 
 These timestamps record what the scraper observed, not when COTA edited its page or when service changes took effect. See [the transport findings](docs/gatsby-transport.md) for source and parsing details.
@@ -50,14 +52,15 @@ composer run lint
 
 ```sh
 composer run scrape
-composer run feed
 composer run build
 git diff
 ```
 
-Generate the feed immediately after scraping: "removal" events are only generated within fifteen minutes of `removed_at`.
+`composer run scrape` updates both the notice archive and RSS feed. The Action invokes this combined command, so the feed writer sees old and new content before the archive changes.
 
-Changes to a known notice's title, category, or sanitized HTML produce a GitHub Actions warning identifying the notice and changed fields. The archive is updated normally; previously published RSS items remain unchanged.
+Changes to an active notice's title, category, or sanitized HTML produce both a GitHub Actions warning and a Change item. Reappearance creates a new Added item instead.
+
+The feed is saved before the archive, so feed failure leaves the old archive available for retry. These are separate file writes, not a transaction; preserve both files if either save fails.
 
 **Commit all changed files.**
 
@@ -73,11 +76,11 @@ Changes to a known notice's title, category, or sanitized HTML produce a GitHub 
 | [reroutes.schema.json](reroutes.schema.json) | Archive schema. |
 | [docs/gatsby-transport.md](docs/gatsby-transport.md) | Source endpoint and extraction findings. |
 
-Identity uses case-insensitive titles with punctuation removed and whitespace normalized. Matches retain UUIDs and `first_seen_at`; content changes advance `updated_at`. Absence sets `removed_at`; reappearance clears it. Duplicate normalized titles fail reconciliation.
+Active records match by case-insensitive titles with punctuation removed and whitespace normalized. Matches retain UUIDs and `first_seen_at`; content changes advance `updated_at`. Absence sets `removed_at` permanently for that occurrence. Reappearance creates a new UUID and first-seen timestamp, retaining the removed record. Historical titles may repeat; duplicate active or extracted titles fail reconciliation.
 
 Extraction requires all three category headings in order and explicit empty-section messages. Unexpected markup fails closed; there is no HTML fallback. Review bulk removals: structurally valid but incomplete upstream content can pass these checks.
 
-The RSS writer appends unseen GUIDs without changing existing items. Addition GUIDs use notice identity; removal GUIDs also include the observation timestamp. New batches are newest-first, appended after existing history. There are no content-edit or reappearance events. Atomic saves prevent partial files, not concurrent-update conflicts.
+The RSS writer prepends unseen GUIDs without changing existing items. Addition GUIDs use notice identity; removal GUIDs also include the observation timestamp. Change GUIDs combine notice identity, the previous version's timestamp, and the edited fields, deduplicating retries while preserving successive edits and reversions. New batches are newest-first, prepended before existing history. Atomic saves prevent partial files, not concurrent-update conflicts.
 
 ### Build and Preview
 

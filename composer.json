@@ -29,7 +29,6 @@
   },
   "scripts": {
     "scrape": "@php scrape.php",
-    "feed": "@php feed.php",
     "build": [
       "mkdir -p _site",
       "@php index.php > _site/index.html",

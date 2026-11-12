@@ -284,11 +284,12 @@ final class Scraper {
 	/**
 	 * Merge a successful extraction into retained state using normalized titles as identity keys.
 	 *
-	 * Matches case-insensitively after whitespace normalization, across categories.
+	 * Matches active records case-insensitively after punctuation removal and
+	 * whitespace normalization, across categories. Removed records are immutable.
 	 * Matching records retain IDs and first_seen_at. Changes to extracted fields,
 	 * the source URL, or the HTML hash advance updated_at; removal alone does not.
-	 * Missing records receive removed_at once. Reappearance clears removed_at,
-	 * without advancing updated_at unless stored content also changes.
+	 * Missing records receive removed_at once. Reappearance creates a new record
+	 * with a new UUID and observation timestamps, preserving the removed occurrence.
 	 * Unmatched titles create new records; title edits may therefore appear as a
 	 * removal and an addition. Existing record order is preserved and new records
 	 * are appended in extraction order. Neither input array is modified.
@@ -297,13 +298,16 @@ final class Scraper {
 	 * @param  list<array{category: string, title: string, html: string}>       $extracted Complete, successfully extracted set of visible notices.
 	 * @param  string                                                           $now       Observation time as a schema-compatible date-time string, normally UTC; not a publication or exact removal time.
 	 * @return array{schema_version: int, notices: list<array<string, string>>} Merged state with IDs, source URLs, hashes, timestamps, and retained removals.
-	 * @throws RuntimeException If persisted or extracted titles have duplicate normalized keys.
+	 * @throws RuntimeException If active persisted or extracted titles have duplicate normalized keys.
 	 * @throws \Random\RandomException If generating a new notice UUID fails.
 	 */
 	public function reconcile(array $previous, array $extracted, string $now): array {
 		$notices = $previous['notices'];
 		$by_title = [];
 		foreach ( $notices as $index => $notice ) {
+			if ( isset( $notice['removed_at'] ) ) {
+				continue;
+			}
 			$key = self::key( $notice['title'] );
 			if ( isset( $by_title[$key] ) ) {
 				throw new RuntimeException( 'Ambiguous persisted notice titles.' );
@@ -359,8 +363,25 @@ final class Scraper {
 	 * @return list<string> Escaped ::warning:: annotations, one per changed known notice.
 	 */
 	public function content_change_warnings(array $previous, array $current): array {
-		$by_id = array_column( $previous['notices'], null, 'id' );
 		$warnings = [];
+		foreach ( $this->content_changes( $previous, $current ) as $change ) {
+			$notice = $change['new'];
+			$message = 'Known notice changed: "' . $notice['title'] . '" (' . $notice['id'] . '); fields: ' . implode( ', ', $change['fields'] ) . '. A Change event includes the old and new content; published RSS items remain unchanged.';
+			$warnings[] = '::warning::' . str_replace( ['%', "\r", "\n"], ['%25', '%0D', '%0A'], $message );
+		}
+		return $warnings;
+	}
+
+	/**
+	 * Collect before-and-after snapshots for edited, previously known visible notices.
+	 *
+	 * @param  array{schema_version: int, notices: list<array<string, string>>} $previous Validated archive before scraping.
+	 * @param  array{schema_version: int, notices: list<array<string, string>>} $current  Validated reconciled archive.
+	 * @return list<array{old: array<string, string>, new: array<string, string>, fields: list<string>}> Changed notices and their edited page fields; excludes additions, removals, and metadata-only changes.
+	 */
+	public function content_changes(array $previous, array $current): array {
+		$by_id = array_column( $previous['notices'], null, 'id' );
+		$changes = [];
 		foreach ( $current['notices'] as $notice ) {
 			if ( isset( $notice['removed_at'] ) || !isset( $by_id[$notice['id']] ) ) {
 				continue;
@@ -370,13 +391,13 @@ final class Scraper {
 				if ( $notice[$field] !== $by_id[$notice['id']][$field] ) {
 					$changed_fields[] = $field;
 				}
+			}
 			if ( $changed_fields === [] ) {
 				continue;
 			}
-			$message = 'Known notice changed: "' . $notice['title'] . '" (' . $notice['id'] . '); fields: ' . implode( ', ', $changed_fields ) . '. Published RSS items remain unchanged.';
-			$warnings[] = '::warning::' . str_replace( ['%', "\r", "\n"], ['%25', '%0D', '%0A'], $message );
+			$changes[] = ['old' => $by_id[$notice['id']], 'new' => $notice, 'fields' => $changed_fields];
 		}
-		return $warnings;
+		return $changes;
 	}
 
 	/**
@@ -512,3 +533,4 @@ final class Scraper {
 			. '-' . substr( $hex, 16, 4 ) . '-' . substr( $hex, 20 );
 	}
 }
+

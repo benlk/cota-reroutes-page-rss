@@ -1,6 +1,6 @@
 <?php
 /**
- * Render archived COTA notices as RSS addition and removal events.
+ * Render archived COTA notices as RSS addition, change, and removal events.
  */
 
 declare(strict_types=1);
@@ -18,6 +18,9 @@ use RuntimeException;
  * Build RSS 2.0 without changing notice state or fetching upstream content.
  *
  * Existing items are immutable history; only unseen event GUIDs are appended.
+ * Change events compare the pre-scrape and reconciled archives and retain both
+ * snapshots. Their identity uses the old version and edited fields, so retries
+ * from the same old state do not publish the same edit twice.
  * Removal events are eligible for insertion during the fifteen minutes after
  * observation, then remain in the feed even after that window has passed.
  * Callers must validate the archive before passing it to this class.
@@ -25,7 +28,7 @@ use RuntimeException;
 final class Feed {
 
 	/**
-	 * Render candidate addition and recent removal events, newest first.
+	 * Render candidate addition, change, and recent removal events, newest first.
 	 *
 	 * This method does not load existing history; save() merges these candidates
 	 * into the persisted feed without replacing previously published items.
@@ -34,13 +37,15 @@ final class Feed {
 	 * exactly fifteen minutes old is included; older removals are excluded. HTML is
 	 * stored as XML text so an RSS reader receives the original sanitized fragment.
 	 *
-	 * @param  array{schema_version: int, notices: list<array<string, string>>} $data Validated notice archive, including removed records.
-	 * @param  DateTimeImmutable                                                $now  Current observation time; supplied explicitly for repeatable tests.
+	 * @param  array{schema_version: int, notices: list<array<string, string>>}      $data     Validated notice archive, including removed records.
+	 * @param  DateTimeImmutable                                                     $now      Current observation time; supplied explicitly for repeatable tests.
+	 * @param  array{schema_version: int, notices: list<array<string, string>>}|null $previous Pre-scrape archive for change detection; null omits change events.
 	 * @return string UTF-8 RSS 2.0 XML, including an XML declaration.
 	 * @throws \DateMalformedStringException If an archive timestamp cannot be parsed.
 	 * @throws RuntimeException If the XML document cannot be serialized.
+	 * @throws \JsonException If a change identity cannot be encoded.
 	 */
-	public function generate(array $data, DateTimeImmutable $now): string {
+	public function generate(array $data, DateTimeImmutable $now, ?array $previous = null): string {
 		$events = [];
 		$cutoff = $now->modify( '-15 minutes' );
 		foreach ( $data['notices'] as $notice ) {
@@ -66,6 +71,28 @@ final class Feed {
 				];
 			}
 		}
+		if ( $previous !== null ) {
+			foreach ( (new Scraper())->content_changes( $previous, $data ) as $change ) {
+				$old = $change['old'];
+				$notice = $change['new'];
+				$changed_at = new DateTimeImmutable( $notice['updated_at'] );
+				if ( $changed_at > $now ) {
+					continue;
+				}
+				$identity = [$old['updated_at']];
+				foreach ( ['title', 'category', 'html'] as $field ) {
+					$identity[] = $old[$field];
+					$identity[] = $notice[$field];
+				}
+				$events[] = [
+					'notice' => $notice,
+					'old' => $old,
+					'type' => 'change',
+					'date' => $changed_at,
+					'guid' => 'urn:cota:notice:' . $notice['id'] . ':change:' . hash( 'sha256', json_encode( $identity, JSON_THROW_ON_ERROR ) ),
+				];
+			}
+		}
 		usort(
 			$events, static function (array $left, array $right): int {
 				$order = $right['date'] <=> $left['date'];
@@ -84,7 +111,7 @@ final class Feed {
 		$rss->appendChild( $channel );
 		$this->add_text( $document, $channel, 'title', 'COTA Reroute Notices' );
 		$this->add_text( $document, $channel, 'link', Scraper::SOURCE_URL );
-		$this->add_text( $document, $channel, 'description', 'Newly observed COTA reroutes, closures, reopenings, and notices no longer listed.' );
+		$this->add_text( $document, $channel, 'description', 'COTA reroutes, closures, and reopenings: additions, content changes, and notices no longer listed.' );
 		$this->add_text( $document, $channel, 'language', 'en-us' );
 
 		$utc = new DateTimeZone( 'UTC' );
@@ -103,7 +130,12 @@ final class Feed {
 			if ( $event['type'] === 'removed' ) {
 				$description = '<p>No longer listed on the COTA reroutes page. This does not imply reopening.</p>';
 			}
-			$this->add_text( $document, $item, 'description', $description . $notice['html'] );
+			$description .= $notice['html'];
+			if ( $event['type'] === 'change' ) {
+				$description = '<h3>Old content</h3>' . $this->snapshot_html( $event['old'] )
+					. '<hr><h3>New content</h3>' . $this->snapshot_html( $notice );
+			}
+			$this->add_text( $document, $item, 'description', $description );
 		}
 		$xml = $document->saveXML();
 		if ( $xml === false ) {
@@ -113,29 +145,32 @@ final class Feed {
 	}
 
 	/**
-	 * Append unseen events to the existing feed and atomically persist the result.
+	 * Prepend unseen events to the existing feed and atomically persist the result.
 	 *
 	 * GUIDs deduplicate events across runs. Existing item content, ordering, and
 	 * channel metadata are preserved, including removals outside the current window.
-	 * New items are appended at the end of the channel. If the feed does not exist,
+	 * New items are prepended newest-first before existing items. If the feed does not exist,
 	 * creates it from the candidate events. Invalid history is never overwritten.
 	 *
 	 * The destination directory must already exist. Concurrent writers must be
 	 * serialized by the caller; an atomic rename is not a lock across the pipeline.
 	 *
-	 * @param  array{schema_version: int, notices: list<array<string, string>>} $data Validated archive to render.
-	 * @param  DateTimeImmutable                                                $now  Current time for removal-window filtering.
-	 * @param  string                                                           $path Destination RSS file path.
-	 * @return bool True if the feed was created or items were appended; false if no GUIDs were new.
+	 * @param  array{schema_version: int, notices: list<array<string, string>>}      $data     Validated archive to render.
+	 * @param  DateTimeImmutable                                                     $now      Current time for removal-window filtering.
+	 * @param  string                                                                $path     Destination RSS file path.
+	 * @param  array{schema_version: int, notices: list<array<string, string>>}|null $previous Pre-scrape archive, required to publish before-and-after change events.
+	 * @return bool True if the feed was created or items were prepended; false if no GUIDs were new.
 	 * @throws RuntimeException If existing RSS is invalid or reading or writing the feed fails.
 	 * @throws \DateMalformedStringException If an archive timestamp cannot be parsed.
+	 * @throws \JsonException If a change identity cannot be encoded.
 	 */
-	public function save(array $data, DateTimeImmutable $now, string $path): bool {
-		$xml = $this->generate( $data, $now );
+	public function save(array $data, DateTimeImmutable $now, string $path, ?array $previous = null): bool {
+		$xml = $this->generate( $data, $now, $previous );
 		if ( is_file( $path ) ) {
 			$document = $this->load_document( Scraper::read( $path ) );
 			$xpath = new DOMXPath( $document );
 			$channel = $xpath->query( '/rss/channel' )->item( 0 );
+			$first_item = $xpath->query( '/rss/channel/item' )->item( 0 );
 			$known_guids = [];
 			foreach ( $xpath->query( '/rss/channel/item' ) as $item ) {
 				$guid = $xpath->evaluate( 'string(guid)', $item );
@@ -152,7 +187,7 @@ final class Feed {
 				if ( isset( $known_guids[$guid] ) ) {
 					continue;
 				}
-				$channel->appendChild( $document->importNode( $item, true ) );
+				$channel->insertBefore( $document->importNode( $item, true ), $first_item );
 				$known_guids[$guid] = true;
 				$changed = true;
 			}
@@ -182,6 +217,18 @@ final class Feed {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Format a notice snapshot with escaped metadata and its sanitized HTML body.
+	 *
+	 * @param  array<string, string> $notice Validated notice containing title, category, and sanitized HTML.
+	 * @return string HTML snapshot for a change event's old or new content section.
+	 */
+	private function snapshot_html(array $notice): string {
+		$title = htmlspecialchars( $notice['title'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' );
+		$category = htmlspecialchars( $notice['category'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' );
+		return '<p><strong>Title:</strong> ' . $title . '<br><strong>Category:</strong> ' . $category . '</p>' . $notice['html'];
 	}
 
 	/**

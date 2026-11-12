@@ -182,7 +182,8 @@ final class ScraperTests {
 		check( $this->scraper->content_change_warnings( self::EMPTY_STATE, $this->data ) === [], 'New notices must not warn.' );
 		$removed = $this->scraper->reconcile( $this->data, array_slice( $this->notices, 1 ), self::LATER );
 		check( $this->scraper->content_change_warnings( $this->data, $removed ) === [], 'Removals must not warn.' );
-		check( $this->scraper->content_change_warnings( $removed, $this->data ) === [], 'Unchanged reappearances must not warn.' );
+		$reappeared = $this->scraper->reconcile( $removed, $this->notices, self::LATEST );
+		check( $this->scraper->content_change_warnings( $removed, $reappeared ) === [], 'A new occurrence must not produce a content-change warning.' );
 		$metadata = $this->data;
 		$metadata['notices'][0]['updated_at'] = self::LATER;
 		check( $this->scraper->content_change_warnings( $this->data, $metadata ) === [], 'Timestamp-only changes must not warn.' );
@@ -201,6 +202,144 @@ final class ScraperTests {
 		check( count( $warnings ) === 1, 'Emit one warning for the changed title.' );
 		check( str_contains( $warnings[0], '50%25%0D%0A::error::' ), 'Escape workflow-command data.' );
 		check( !str_contains( $warnings[0], "\r" ) && !str_contains( $warnings[0], "\n" ), 'Keep warning annotations on one physical line.' );
+	}
+
+	/**
+	 * Verify a matched edit produces a Change event containing both sanitized snapshots.
+	 *
+	 * @return void
+	 * @throws Throwable If change identity, timestamp, or old/new contents are incorrect.
+	 */
+	private function test_feed_change_snapshots(): void {
+		$changed = $this->notices;
+		$changed[0]['title'] = 'Nov 16 Improvements';
+		$changed[0]['category'] = 'closure';
+		$changed[0]['html'] = '<p>Updated route &amp; stop.</p>';
+		$data = $this->scraper->reconcile( $this->data, $changed, self::LATER );
+		$this->scraper->validate( $data, $this->schema );
+		$xml = (new Feed())->generate( $data, new DateTimeImmutable( self::LATER ), $this->data );
+		$document = new DOMDocument();
+		check( $document->loadXML( $xml, LIBXML_NONET ), 'Change events must be valid XML.' );
+		$xpath = new DOMXPath( $document );
+		check( $xpath->evaluate( 'count(/rss/channel/item[category="change"])' ) === 1.0, 'Emit one Change item for all edited fields on a notice.' );
+		check( $xpath->evaluate( 'string(/rss/channel/item[category="change"]/title)' ) === 'Change: Nov 16 Improvements', 'Label edited notices as Change events.' );
+		check( $xpath->evaluate( 'string(/rss/channel/item[category="change"]/pubDate)' ) === (new DateTimeImmutable( self::LATER ))->format( DATE_RSS ), 'Date changes by the new observation timestamp.' );
+		$description = $xpath->evaluate( 'string(/rss/channel/item[category="change"]/description)' );
+		[$old, $new] = explode( '<hr><h3>New content</h3>', $description );
+		check( str_starts_with( $old, '<h3>Old content</h3>' ), 'Label the old snapshot.' );
+		check( str_contains( $old, $this->data['notices'][0]['html'] ), 'Include the complete old HTML.' );
+		check( str_contains( $new, $changed[0]['html'] ), 'Include the complete new HTML.' );
+		check( str_contains( $old, $this->notices[0]['title'] ) && str_contains( $new, $changed[0]['title'] ), 'Show old and new titles.' );
+		check( str_contains( $old, 'reroute' ) && str_contains( $new, 'closure' ), 'Show old and new categories.' );
+	}
+
+	/**
+	 * Verify additions, removals, unchanged records, and timestamp edits are not Change events.
+	 *
+	 * @return void
+	 * @throws Throwable If lifecycle or metadata changes are misclassified as content edits.
+	 */
+	private function test_feed_change_lifecycle_exclusions(): void {
+		$removed = $this->scraper->reconcile( $this->data, array_slice( $this->notices, 1 ), self::LATER );
+		$metadata = $this->data;
+		$metadata['notices'][0]['updated_at'] = self::LATER;
+		$pairs = [
+			[self::EMPTY_STATE, $this->data],
+			[$this->data, $this->data],
+			[$this->data, $removed],
+			[$removed, $this->scraper->reconcile( $removed, $this->notices, self::LATER )],
+			[$this->data, $metadata],
+		];
+		foreach ( $pairs as [$previous, $current] ) {
+			$xml = (new Feed())->generate( $current, new DateTimeImmutable( self::LATER ), $previous );
+			$document = new DOMDocument();
+			check( $document->loadXML( $xml, LIBXML_NONET ), 'Parse candidate events.' );
+			$xpath = new DOMXPath( $document );
+			check( $xpath->evaluate( 'count(/rss/channel/item[category="change"])' ) === 0.0, 'Only edited page content may produce Change items.' );
+		}
+	}
+
+	/**
+	 * Verify append-only Change history deduplicates retries without rewriting original items.
+	 *
+	 * @return void
+	 * @throws Throwable If retries append duplicates or overwrite published addition content.
+	 */
+	private function test_feed_change_persistence(): void {
+		$this->with_feed_file(
+			function (string $path): void {
+				$feed = new Feed();
+				$feed->save( $this->data, new DateTimeImmutable( self::FIRST ), $path );
+				$changed = $this->notices;
+				$changed[0]['html'] .= '<p>Changed stop instructions.</p>';
+				$data = $this->scraper->reconcile( $this->data, $changed, self::LATER );
+				check( $feed->save( $data, new DateTimeImmutable( self::LATER ), $path, $this->data ), 'Append a new Change item.' );
+				$published = Scraper::read( $path );
+				check( !$feed->save( $data, new DateTimeImmutable( self::LATER ), $path, $this->data ), 'Deduplicate the same before-and-after event.' );
+				$retry = $this->scraper->reconcile( $this->data, $changed, self::LATEST );
+				check( !$feed->save( $retry, new DateTimeImmutable( self::LATEST ), $path, $this->data ), 'A retry against the old archive must retain the change GUID even at a later time.' );
+				check( !$feed->save( $data, new DateTimeImmutable( self::LATEST ), $path, $data ), 'Unchanged snapshots must not append another change.' );
+				check( Scraper::read( $path ) === $published, 'Retries leave published snapshots unchanged.' );
+				$document = new DOMDocument();
+				check( $document->loadXML( $published, LIBXML_NONET ), 'Parse persisted Change history.' );
+				$xpath = new DOMXPath( $document );
+				check( $xpath->evaluate( 'count(/rss/channel/item[category="change"])' ) === 1.0, 'Persist one change event.' );
+				$guid = 'urn:cota:notice:' . $this->data['notices'][0]['id'] . ':added';
+				$description = $xpath->evaluate( 'string(/rss/channel/item[guid="' . $guid . '"]/description)' );
+				check( !str_contains( $description, 'Changed stop instructions.' ), 'Do not replace an original addition with edited HTML.' );
+			} 
+		);
+	}
+
+	/**
+	 * Verify repeated transitions after intervening edits remain distinct historical changes.
+	 *
+	 * @return void
+	 * @throws Throwable If a later edit or reversion is collapsed into an older Change event.
+	 */
+	private function test_feed_successive_changes(): void {
+		$this->with_feed_file(
+			function (string $path): void {
+				$feed = new Feed();
+				$changed = $this->notices;
+				$changed[0]['html'] .= '<p>Revised route.</p>';
+				$second = $this->scraper->reconcile( $this->data, $changed, self::LATER );
+				$feed->save( $this->data, new DateTimeImmutable( self::FIRST ), $path );
+				$feed->save( $second, new DateTimeImmutable( self::LATER ), $path, $this->data );
+				$third = $this->scraper->reconcile( $second, $this->notices, self::LATEST );
+				check( $feed->save( $third, new DateTimeImmutable( self::LATEST ), $path, $second ), 'Publish a reversion to earlier content.' );
+				$next_time = '2026-11-14T12:00:00Z';
+				$fourth = $this->scraper->reconcile( $third, $changed, $next_time );
+				check( $feed->save( $fourth, new DateTimeImmutable( $next_time ), $path, $third ), 'The same edit from a later archived version is a distinct change.' );
+				$document = new DOMDocument();
+				check( $document->loadXML( Scraper::read( $path ), LIBXML_NONET ), 'Parse successive Change events.' );
+				$xpath = new DOMXPath( $document );
+				check( $xpath->evaluate( 'count(/rss/channel/item[category="change"])' ) === 3.0, 'Retain the edit, reversion, and repeated edit.' );
+			} 
+		);
+	}
+
+	/**
+	 * Verify failed publication leaves both input snapshots available for a retry.
+	 *
+	 * @return void
+	 * @throws Throwable If failed publication mutates snapshots or corrupts the existing feed.
+	 */
+	private function test_feed_change_publication_failure(): void {
+		$this->with_feed_file(
+			function (string $path): void {
+				$feed = new Feed();
+				$changed = $this->notices;
+				$changed[0]['html'] .= '<p>New route.</p>';
+				$data = $this->scraper->reconcile( $this->data, $changed, self::LATER );
+				$previous = $this->data;
+				$expected = $data;
+				file_put_contents( $path, '<rss>' );
+				rejects( fn () => $feed->save( $data, new DateTimeImmutable( self::LATER ), $path, $previous ), 'Invalid history must prevent publication.' );
+				check( $previous === $this->data && $data === $expected, 'Keep the old and new snapshots unchanged on failure.' );
+				check( Scraper::read( $path ) === '<rss>', 'Do not overwrite invalid RSS history.' );
+			} 
+		);
 	}
 
 	/**
@@ -420,14 +559,78 @@ final class ScraperTests {
 	}
 
 	/**
-	 * Verify reappearance clears removed_at without changing identity or unchanged content time.
+	 * Verify a reappearance creates a new occurrence and preserves the removed record.
 	 *
 	 * @return void
-	 * @throws RuntimeException If a reappearing notice does not regain its original state.
+	 * @throws Throwable If history is changed, a new identity is missing, or schema validation fails.
 	 */
-	private function test_reappearance_clears_removal(): void {
+	private function test_reappearance_creates_new_occurrence(): void {
 		$removed = $this->scraper->reconcile( $this->data, array_slice( $this->notices, 1 ), self::LATER );
-		check( $this->scraper->reconcile( $removed, $this->notices, self::LATEST ) === $this->data, 'Reappearance must clear removal without changing identity.' );
+		$reappeared = $this->scraper->reconcile( $removed, $this->notices, self::LATEST );
+		check( count( $reappeared['notices'] ) === 4, 'Retain the removed occurrence and add a new record.' );
+		check( array_slice( $reappeared['notices'], 0, 3 ) === $removed['notices'], 'Do not alter any previously stored record on reappearance.' );
+		$new = $reappeared['notices'][3];
+		check( $new['id'] !== $removed['notices'][0]['id'], 'Assign a new UUID to the returned notice.' );
+		check( $new['first_seen_at'] === self::LATEST && $new['updated_at'] === self::LATEST, 'Date the new occurrence by its return observation.' );
+		check( !isset( $new['removed_at'] ), 'The new occurrence must be active.' );
+		check( $new['title'] === $removed['notices'][0]['title'], 'Allow the active occurrence to share a historical title.' );
+		$this->scraper->validate( $reappeared, $this->schema );
+	}
+
+	/**
+	 * Verify subsequent scrapes match only the active occurrence of a returned title.
+	 *
+	 * @return void
+	 * @throws Throwable If history is changed, records multiply, or edits target the removed occurrence.
+	 */
+	private function test_reappeared_occurrence_matches_active_record(): void {
+		$removed = $this->scraper->reconcile( $this->data, array_slice( $this->notices, 1 ), self::LATER );
+		$reappeared = $this->scraper->reconcile( $removed, $this->notices, self::LATEST );
+		$next_time = '2026-11-14T12:00:00Z';
+		check( $this->scraper->reconcile( $reappeared, $this->notices, $next_time ) === $reappeared, 'Unchanged scrapes must match the new active occurrence.' );
+		$changed = $this->notices;
+		$changed[0]['html'] .= '<p>Updated returned notice.</p>';
+		$data = $this->scraper->reconcile( $reappeared, $changed, $next_time );
+		check( count( $data['notices'] ) === 4, 'Edits must not create another occurrence while the notice is active.' );
+		check( $data['notices'][0] === $removed['notices'][0], 'Preserve the historical occurrence and removed_at.' );
+		check( $data['notices'][3]['id'] === $reappeared['notices'][3]['id'], 'Edit the active occurrence rather than the historical one.' );
+		check( $data['notices'][3]['html'] === $changed[0]['html'], 'Store the edited HTML on the active occurrence.' );
+		check( $data['notices'][3]['updated_at'] === $next_time, 'Advance the active occurrence update time.' );
+		$this->scraper->validate( $data, $this->schema );
+	}
+
+	/**
+	 * Verify multiple disappearance/return cycles preserve distinct removed occurrences.
+	 *
+	 * @return void
+	 * @throws Throwable If historical title duplicates cause ambiguity or removal dates are lost.
+	 */
+	private function test_repeated_reappearances_preserve_history(): void {
+		$visible = array_slice( $this->notices, 1 );
+		$removed = $this->scraper->reconcile( $this->data, $visible, self::LATER );
+		$reappeared = $this->scraper->reconcile( $removed, $this->notices, self::LATEST );
+		$removed_again = $this->scraper->reconcile( $reappeared, $visible, '2026-11-14T12:00:00Z' );
+		$returned_again = $this->scraper->reconcile( $removed_again, $this->notices, '2026-11-15T12:00:00Z' );
+		check( count( $returned_again['notices'] ) === 5, 'Create one record per observed occurrence.' );
+		check( array_slice( $returned_again['notices'], 0, 4 ) === $removed_again['notices'], 'Preserve all previous occurrences unchanged.' );
+		check( $returned_again['notices'][0]['removed_at'] === self::LATER, 'Retain the first removal date.' );
+		check( $returned_again['notices'][3]['removed_at'] === '2026-11-14T12:00:00Z', 'Retain the second removal date independently.' );
+		check( !isset( $returned_again['notices'][4]['removed_at'] ), 'Only the latest occurrence is active.' );
+		$this->scraper->validate( $returned_again, $this->schema );
+	}
+
+	/**
+	 * Verify duplicate normalized titles remain invalid among active archive records.
+	 *
+	 * @return void
+	 * @throws RuntimeException If ambiguous active title matches are accepted.
+	 */
+	private function test_active_duplicate_titles_rejected(): void {
+		$data = $this->data;
+		$duplicate = $data['notices'][0];
+		$duplicate['id'] = '00000000-0000-4000-8000-000000000001';
+		$data['notices'][] = $duplicate;
+		rejects( fn () => $this->scraper->reconcile( $data, $this->notices, self::LATER ), 'Reject multiple active records with the same normalized title.' );
 	}
 
 	/**
@@ -724,12 +927,12 @@ final class ScraperTests {
 	}
 
 	/**
-	 * Verify only new addition GUIDs are appended, preserving published item content and order.
+	 * Verify only new addition GUIDs are prepended, preserving published item content and order.
 	 *
 	 * @return void
 	 * @throws Throwable If additions are duplicated or existing history is rewritten.
 	 */
-	private function test_feed_appends_new_additions(): void {
+	private function test_feed_prepends_new_additions(): void {
 		$this->with_feed_file(
 			function (string $path): void {
 				$feed = new Feed();
@@ -743,14 +946,55 @@ final class ScraperTests {
 				$notices = [...$this->notices, $new_notice];
 				$data = $this->scraper->reconcile( $this->data, $notices, self::LATER );
 				$data['notices'][0]['title'] .= ' edited after publication';
-				check( $feed->save( $data, $now, $path ), 'A new addition must append an RSS item.' );
+				check( $feed->save( $data, $now, $path ), 'A new addition must prepend an RSS item.' );
 				check( $document->loadXML( Scraper::read( $path ), LIBXML_NONET ), 'Parse the appended RSS feed.' );
 				$xpath = new DOMXPath( $document );
 				check( $xpath->evaluate( 'count(/rss/channel/item)' ) === 4.0, 'Append exactly one new item.' );
-				check( $xpath->evaluate( 'string(/rss/channel/item[last()]/title)' ) === 'Added: A newly observed reroute', 'Append new events after existing items.' );
-				check( $document->saveXML( $document->getElementsByTagName( 'item' )->item( 0 ) ) === $original_item, 'Published items must retain their content and order.' );
+				check( $xpath->evaluate( 'string(/rss/channel/item[1]/title)' ) === 'Added: A newly observed reroute', 'Prepend new events before existing items.' );
+				check( $document->saveXML( $document->getElementsByTagName( 'item' )->item( 1 ) ) === $original_item, 'Published items must retain their content and relative order.' );
 				check( !$feed->save( $data, $now, $path ), 'Do not append an already published addition again.' );
-			} 
+			}
+		);
+	}
+
+	/**
+	 * Verify a multi-item batch is prepended newest-first without reordering history.
+	 *
+	 * @return void
+	 * @throws Throwable If batch order is reversed or existing history is moved within itself.
+	 */
+	private function test_feed_prepends_newest_first_batch(): void {
+		$this->with_feed_file(
+			function (string $path): void {
+				$feed = new Feed();
+				$feed->save( $this->data, new DateTimeImmutable( self::FIRST ), $path );
+				$document = new DOMDocument();
+				check( $document->loadXML( Scraper::read( $path ), LIBXML_NONET ), 'Parse the original feed.' );
+				$history = [];
+				foreach ( $document->getElementsByTagName( 'item' ) as $item ) {
+					$history[] = $document->saveXML( $item );
+				}
+				$older = $this->notices[0];
+				$older['title'] = 'Earlier new notice';
+				$notices = [...$this->notices, $older];
+				$data = $this->scraper->reconcile( $this->data, $notices, self::LATER );
+				$newer = $this->notices[0];
+				$newer['title'] = 'Latest new notice';
+				$notices[] = $newer;
+				$data = $this->scraper->reconcile( $data, $notices, self::LATEST );
+				check( $feed->save( $data, new DateTimeImmutable( self::LATEST ), $path ), 'Publish both new notices in one batch.' );
+				check( $document->loadXML( Scraper::read( $path ), LIBXML_NONET ), 'Parse the prepended batch.' );
+				$xpath = new DOMXPath( $document );
+				check( $xpath->evaluate( 'count(/rss/channel/item)' ) === 5.0, 'Prepend both new items exactly once.' );
+				check( $xpath->evaluate( 'string(/rss/channel/item[1]/title)' ) === 'Added: Latest new notice', 'Place the newest item first.' );
+				check( $xpath->evaluate( 'string(/rss/channel/item[2]/title)' ) === 'Added: Earlier new notice', 'Preserve descending dates inside the new batch.' );
+				foreach ( $history as $index => $xml ) {
+					check( $document->saveXML( $document->getElementsByTagName( 'item' )->item( $index + 2 ) ) === $xml, 'Preserve every old item in its original relative order.' );
+				}
+				$published = Scraper::read( $path );
+				check( !$feed->save( $data, new DateTimeImmutable( self::LATEST ), $path ), 'Do not prepend the same batch again.' );
+				check( Scraper::read( $path ) === $published, 'A duplicate batch must leave file bytes unchanged.' );
+			}
 		);
 	}
 
@@ -774,7 +1018,7 @@ final class ScraperTests {
 				check( !$feed->save( $data, $now, $path ), 'Content edits must not replace published items.' );
 				check( !$feed->save( self::EMPTY_STATE, $now, $path ), 'An empty archive must not erase published events.' );
 				check( Scraper::read( $path ) === $original, 'No new GUIDs means no file rewrite.' );
-			} 
+			}
 		);
 	}
 
@@ -800,9 +1044,18 @@ final class ScraperTests {
 				check( $xpath->evaluate( 'count(/rss/channel/item[category="removed"])' ) === 1.0, 'Store exactly one removal event.' );
 				check( !$feed->save( $data, $now, $path ), 'Do not duplicate a removal within its window.' );
 				check( !$feed->save( $data, new DateTimeImmutable( self::LATEST ), $path ), 'Expiry must not delete a published removal.' );
-				check( !$feed->save( $this->data, new DateTimeImmutable( self::LATEST ), $path ), 'Reappearance must not erase the previous removal event.' );
-				check( Scraper::read( $path ) === $original, 'Removal history must remain byte-for-byte unchanged.' );
-			} 
+				check( Scraper::read( $path ) === $original, 'Expiry must leave removal history byte-for-byte unchanged.' );
+				$reappeared = $this->scraper->reconcile( $data, $this->notices, self::LATEST );
+				check( $feed->save( $reappeared, new DateTimeImmutable( self::LATEST ), $path, $data ), 'Reappearance must publish a new Added event.' );
+				check( $document->loadXML( Scraper::read( $path ), LIBXML_NONET ), 'Parse the new occurrence and retained history.' );
+				$xpath = new DOMXPath( $document );
+				check( $xpath->evaluate( 'count(/rss/channel/item[category="added"])' ) === 4.0, 'Retain original additions and add the returned occurrence.' );
+				check( $xpath->evaluate( 'count(/rss/channel/item[category="removed"])' ) === 1.0, 'Retain the original removal event.' );
+				check( $xpath->evaluate( 'count(/rss/channel/item[category="change"])' ) === 0.0, 'Reappearance is an addition, not a content edit.' );
+				check( $xpath->evaluate( 'string(/rss/channel/item[1]/guid)' ) === 'urn:cota:notice:' . $reappeared['notices'][3]['id'] . ':added', 'Prepend an Added event with the new occurrence UUID.' );
+				check( $xpath->evaluate( 'string(/rss/channel/item[1]/pubDate)' ) === (new DateTimeImmutable( self::LATEST ))->format( DATE_RSS ), 'Date the returned occurrence by its new first-seen time.' );
+				check( !$feed->save( $reappeared, new DateTimeImmutable( self::LATEST ), $path, $data ), 'Do not duplicate the returned occurrence event on replay.' );
+			}
 		);
 	}
 
@@ -826,7 +1079,7 @@ final class ScraperTests {
 				$xpath = new DOMXPath( $document );
 				check( $xpath->evaluate( 'count(/rss/channel/item[category="removed"])' ) === 2.0, 'Retain both removal events.' );
 				check( $xpath->evaluate( 'count(/rss/channel/item[category="added"])' ) === 3.0, 'Do not duplicate existing addition events.' );
-			} 
+			}
 		);
 	}
 
@@ -845,7 +1098,7 @@ final class ScraperTests {
 					  rejects( fn () => $feed->save( $this->data, new DateTimeImmutable( self::LATER ), $path ), 'Reject invalid RSS history.' );
 					  check( Scraper::read( $path ) === $xml, 'Invalid history must not be overwritten.' );
 				}
-			} 
+			}
 		);
 	}
 
@@ -865,7 +1118,7 @@ final class ScraperTests {
 					  rejects( fn () => $feed->save( $this->data, new DateTimeImmutable( self::LATER ), $path ), 'Reject missing or ambiguous GUIDs.' );
 					  check( Scraper::read( $path ) === $xml, 'Ambiguous history must not be overwritten.' );
 				}
-			} 
+			}
 		);
 	}
 
