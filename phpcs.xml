@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<ruleset name="Project CLI Rules">
+	<description>Wordpress-like but without some Wordpressicisms.</description>
+	<arg name="tab-width" value="4"/>
+
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/data/*</exclude-pattern>
+
+	<rule ref="PEAR">
+		<exclude name="Generic.WhiteSpace.DisallowTabIndent" />
+		<exclude name="Squiz.Functions.MultiLineFunctionDeclaration" />
+		<exclude name="PEAR.Functions.FunctionCallSignature" />
+		<exclude name="Generic.Files.LineLength.TooLong" />
+		<exclude name="PEAR.NamingConventions.ValidFunctionName.FunctionNoCapital" />
+		<exclude name="PEAR.NamingConventions.ValidFunctionName.FunctionNameInvalid" />
+		<exclude name="PEAR.Functions.FunctionDeclaration.BraceOnSameLine" />
+		<exclude name="PEAR.Commenting.FileComment.MissingVersion" />
+		<exclude name="PEAR.Commenting.FileComment.MissingCategoryTag" />
+		<exclude name="PEAR.Commenting.FileComment.MissingPackageTag" />
+		<exclude name="PEAR.Commenting.FileComment.MissingAuthorTag" />
+		<exclude name="PEAR.Commenting.FileComment.MissingLicenseTag" />
+		<exclude name="PEAR.Commenting.FileComment.MissingLinkTag" />
+		<exclude name="Generic.Commenting.DocComment.NonParamGroup" />
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.ValidVariableName" />
+	<rule ref="Generic.WhiteSpace.DisallowSpaceIndent" />
+
+	<rule ref="Generic.WhiteSpace.ScopeIndent">
+		<properties>
+			<property name="tabIndent" value="true"/>
+			<property name="ignoreIndentationTokens" type="array">
+				<element value="T_COMMENT"/>
+				<element value="T_DOC_COMMENT_OPEN_TAG"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="Generic.Functions.OpeningFunctionBraceKernighanRitchie">
+		<properties>
+			<property name="checkFunctions" value="true"/>
+			<property name="checkClosures" value="true"/>
+		</properties>
+	</rule>
+
+	<!-- Require spaces after opening parenthesis and before closing parenthesis in function calls -->
+	<rule ref="PEAR.Functions.FunctionCallSignature">
+		<properties>
+			<property name="requiredSpacesAfterOpen" value="1"/>
+			<property name="requiredSpacesBeforeClose" value="1"/>
+		</properties>
+	</rule>
+</ruleset>

@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "COTA Reroute Notices",
+  "description": "Persisted notices extracted from COTA's reroutes page. IDs remain stable when notice content changes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "notices"],
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "description": "Version of the persisted data format."
+    },
+    "notices": {
+      "type": "array",
+      "description": "Extracted notices.",
+      "items": {
+        "$ref": "#/$defs/notice"
+      }
+    }
+  },
+  "$defs": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "category",
+        "title",
+        "html",
+        "source_url",
+        "content_hash",
+        "first_seen_at",
+        "updated_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Assigned persistent UUID, independent of title, category, and content hash."
+        },
+        "category": {
+          "type": "string",
+          "enum": ["reroute", "closure", "reopening"],
+          "description": "Publisher section, not an inferred operational status."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "Notice heading as plain text, including the publisher's date wording."
+        },
+        "html": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "Notice HTML fragment, including its heading and associated paragraphs and lists. HTML syntax and safety require separate checks."
+        },
+        "source_url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https?://",
+          "description": "Public page URL, rather than the Gatsby transport endpoint."
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Lowercase hexadecimal SHA-256 of the UTF-8 bytes of the stored html string."
+        },
+        "first_seen_at": {
+          "$ref": "#/$defs/timestamp",
+          "description": "Time the scraper first observed this notice, not its publication date."
+        },
+        "updated_at": {
+          "$ref": "#/$defs/timestamp",
+          "description": "Time the stored title, category, HTML, or source URL last changed. Initially equal to first_seen_at; unchanged scrapes do not update it."
+        },
+        "removed_at": {
+          "$ref": "#/$defs/timestamp",
+          "description": "Time the scraper first observed this notice missing from the source page during a successful, validated scrape, not the exact removal time or a reopening date. Omitted while visible; cleared if the notice reappears."
+        }
+      }
+    }
+  }
+}
