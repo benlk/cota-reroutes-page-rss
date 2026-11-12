@@ -26,16 +26,15 @@ cota.com uses [Gatsby](https://www.gatsbyjs.com/), which publishes the reroutes 
 
 1. **Fetch:** A scheduled GitHub Action runs the PHP scraper, which reads the fragment at `result.data.page.edges[0].node.content`.
 2. **Extract:** The headings Reroutes, Closures, and Reopenings define categories. A paragraph beginning with bold text, optionally inside a link, starts a notice; subsequent paragraphs and lists belong to it. The scraper sanitizes the HTML and resolves relative links.
-3. **Compare:** Extracted notices are matched against [the archive](data/notices.json) by title:
+3. **Compare and Save:** Extracted notices are matched against [the archive](data/notices.json) by title:
     - New notices receive a first-seen timestamp and a new GUID, and generate an "Added" feed item.
 	- Notices gone missing receive a `removed_at` timestamp, and generate a "Removed" feed item if the feed is generated within 15 mintes of the item being marked in the data set as removed.
 	- Reappearing notices create new records and Added feed items; previous records retain their removal timestamps.
 	- Notices whose contents are edited generate a "Change" item in the RSS feed, with the before and after and `updated_at` time.
 	- Unexpected markup or ambiguous titles abort the scrape rather than guess.
-4. **Append:** During the same scrape command, the RSS writer adds unseen events to [the feed](data/feed.xml). Additions use the first-seen timestamp; changes include both snapshots and use `updated_at`. Removals are eligible within fifteen minutes of `removed_at`. Existing items are never rewritten. The archive advances only after feed publication succeeds.
-5. **Publish:** The scrape workflow commits changed data. After successful completion, the Pages workflow renders this README, copies the existing feed into the website build, and deploys it to GitHub Pages. Feed readers then discover new items by GUID.
+4. **Publish:** The scrape workflow commits changed data. After successful completion, the Pages workflow renders this README, copies the existing feed into the website build, and deploys it to GitHub Pages.
 
-These timestamps record what the scraper observed, not when COTA edited its page or when service changes took effect. See [the transport findings](docs/gatsby-transport.md) for source and parsing details.
+Timestamps record the time the scraper observed something, not when COTA edited its page or when service changes took effect. See [the discovery findings doc](docs/gatsby-transport.md) for source and parsing details.
 
 ## For Maintainers
 
@@ -48,19 +47,13 @@ composer run test
 composer run lint
 ```
 
-### Update the Data and Feed
+### Update the Data and Site
 
 ```sh
 composer run scrape
 composer run build
 git diff
 ```
-
-`composer run scrape` updates both the notice archive and RSS feed. The Action invokes this combined command, so the feed writer sees old and new content before the archive changes.
-
-Changes to an active notice's title, category, or sanitized HTML produce both a GitHub Actions warning and a Change item. Reappearance creates a new Added item instead.
-
-The feed is saved before the archive, so feed failure leaves the old archive available for retry. These are separate file writes, not a transaction; preserve both files if either save fails.
 
 **Commit all changed files.**
 
@@ -80,24 +73,19 @@ Active records match by case-insensitive titles with punctuation removed and whi
 
 Extraction requires all three category headings in order and explicit empty-section messages. Unexpected markup fails closed; there is no HTML fallback. Review bulk removals: structurally valid but incomplete upstream content can pass these checks.
 
-The RSS writer prepends unseen GUIDs without changing existing items. Addition GUIDs use notice identity; removal GUIDs also include the observation timestamp. Change GUIDs combine notice identity, the previous version's timestamp, and the edited fields, deduplicating retries while preserving successive edits and reversions. New batches are newest-first, prepended before existing history. Atomic saves prevent partial files, not concurrent-update conflicts.
+The RSS writer prepends new items without changing existing items. Feed GUIDs for additions use the notice's identity; removal GUIDs also include the observation timestamp. Change GUIDs combine notice identity, the previous version's timestamp, and the edited fields, deduplicating retries while preserving successive edits and reversions. New batches are newest-first, prepended before existing history.
 
 ### Build and Preview
 
 1. Run `composer run build` to generate `_site/` from the README, CSS, and existing feed. Missing feed data fails the build.
 2. Run `php -S localhost:8000 -t _site` to start the preview server.
 3. Open <http://localhost:8000/>.
-4. Press `Ctrl+C` in the terminal to stop the server.
-
-Only `_site/.gitkeep` is tracked.
-
-For forks or custom domains, update the subscription URL above and the repository URL in [index.php](index.php).
 
 ### GitHub Actions and Pages
 
-[Scraping](.github/workflows/scrape.yml) tests relevant pushes and PRs; scheduled and default-branch manual runs also scrape, append feed events, and commit changed data. [Pages](.github/workflows/pages.yml) deploys `_site/` after pushes to `trunk`, manual dispatch, or successful scraper completion. The completion trigger handles bot commits, which do not trigger another push workflow.
+[Scraping](.github/workflows/scrape.yml) tests relevant pushes and PRs; scheduled and default-branch manual runs also scrape, append feed events, and commit changed data.
 
-Select **GitHub Actions** as the Pages source, allow bot data commits under branch rules, and keep branch filters aligned with the default branch (currently `trunk`). GitHub may disable schedules in inactive public repositories.
+[Pages](.github/workflows/pages.yml) deploys `_site/` after pushes to `trunk`, manual dispatch, or successful scraper completion. The completion trigger handles bot commits, which do not trigger another push workflow.
 
 ### Troubleshooting
 
@@ -106,5 +94,5 @@ Select **GitHub Actions** as the Pages source, allow bot data commits under bran
 | Extraction fails | Inspect upstream markup or title collisions; update tests before changing parsing. |
 | RSS rejected | Repair malformed XML or ambiguous GUIDs without discarding history. |
 | Removal missing | Check the fifteen-minute publication window; late retries do not backfill it. |
-| Website stale | Check both workflows, the data commit, and Pages deployment. |
+| Website stale | Check both workflows, the data commit, and Pages deployment status. |
 | Push rejected | Check branch rules or branch advancement; rerun without force-pushing. |
