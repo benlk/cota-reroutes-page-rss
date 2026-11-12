@@ -68,7 +68,8 @@ $html = <<<HTML
 	</main>
 	<footer class="site-footer">
 		<p>Independent project. Not affiliated with the Central Ohio Transit Authority.</p>
-		<a href="https://cota.com/reroutes/">Official COTA reroute information</a>
+		<p><a href="https://cota.com/reroutes/">Official COTA reroute information</a></p>
+		<p><a href="https://benlk.github.io/">More projects like this, from Ben Keith</a></p>
 	</footer>
 </body>
 </html>
