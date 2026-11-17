@@ -29,7 +29,8 @@
             "content_hash": "15f6a98c642f56bdf00280da8c41206eb1aed30c67820786f2701865654b41e4",
             "id": "3215329e-a3e9-41ab-80cb-344f317cb85d",
             "first_seen_at": "2026-11-12T01:33:08Z",
-            "updated_at": "2026-11-13T13:03:07Z"
+            "updated_at": "2026-11-13T13:03:07Z",
+            "removed_at": "2026-11-17T14:19:10Z"
         },
         {
             "category": "reroute",
@@ -59,7 +60,8 @@
             "content_hash": "b1c30f217ff5d2f9733f2005d0f636f390baa01fd20727274a89b33a81a3574a",
             "id": "43d46791-0a01-4204-a9d5-1f3f4273c6a6",
             "first_seen_at": "2026-11-12T01:33:08Z",
-            "updated_at": "2026-11-12T01:33:08Z"
+            "updated_at": "2026-11-12T01:33:08Z",
+            "removed_at": "2026-11-17T14:19:10Z"
         },
         {
             "category": "closure",
@@ -109,7 +111,8 @@
             "content_hash": "35083ac5f03dc7c7c705b08ddf070c6f45daaeabc1799c8e3869300a47a634b0",
             "id": "05ded2c1-ecc4-469d-aed9-74f88b68c77b",
             "first_seen_at": "2026-11-14T12:07:50Z",
-            "updated_at": "2026-11-14T12:07:50Z"
+            "updated_at": "2026-11-14T12:07:50Z",
+            "removed_at": "2026-11-17T14:19:10Z"
         },
         {
             "category": "reroute",
@@ -119,7 +122,8 @@
             "content_hash": "12c9ff28144c2e7a38983d903661d39dd64676bf79d265db4b00688d08296590",
             "id": "d750daeb-55d4-46e5-9cbd-5664904c0b57",
             "first_seen_at": "2026-11-14T12:07:50Z",
-            "updated_at": "2026-11-14T12:07:50Z"
+            "updated_at": "2026-11-14T12:07:50Z",
+            "removed_at": "2026-11-17T14:19:10Z"
         },
         {
             "category": "closure",
@@ -140,6 +144,26 @@
             "id": "26d34918-64c5-41ab-b93c-1bfe58eea9b2",
             "first_seen_at": "2026-11-14T12:07:50Z",
             "updated_at": "2026-11-14T12:07:50Z"
+        },
+        {
+            "category": "closure",
+            "title": "November 18, 2026: S. High St. & Hosack St.",
+            "html": "<p><a href=\"https://cota.com/static/688e6d5f48693ffa8272792bcaa86442/COTA_2026-SID-1059-Closure_Map-Graphic.jpg\"><strong>November 18, 2026: S. High St. &amp; Hosack St.</strong></a><br />\nImpacted Stop: 1059<br />\nImpacted Line: 8</p>\n<p>Use nearby southbound stops during the temporary closure.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "c038572cc70b2a5e86dd9ae16c962926d078c627e3493f0bec322c6f86748ae9",
+            "id": "c27238f1-4d3e-490b-85cd-5d240088353a",
+            "first_seen_at": "2026-11-17T14:19:10Z",
+            "updated_at": "2026-11-17T14:19:10Z"
+        },
+        {
+            "category": "closure",
+            "title": "Nov. 10, 2026: Lines 10 & 25 Long-Term Stop Closures",
+            "html": "<p><strong>Nov. 10, 2026: Lines 10 &amp; 25 Long-Term Stop Closures</strong><br />\nImpacted Stops: 5428, 6297, 6298 &amp; 6383<br />\nImpacted Lines: 10 &amp; 25</p>\n<p>Due to construction, Stop 5428 located at E. Broad St. &amp; Taylor Station Rd., Stop 6383 located at E. Broad St. &amp; McNaughten Rd. and Stop 6297 located at E. Broad St. &amp; Outerbelt St. are closed and expected to reopen in summer 2027. Stop 6298 located at E. Broad St. &amp; Outerbelt St. is expected to reopen first, by early 2027. During this time, Line 10 and Line 25 riders should use nearby same-directional stops during this time.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "536de503cd8ed1628837df0fbafc480e3ec26782ed32038e6cfcf66357204a71",
+            "id": "f84b4507-5db6-4785-ac65-d405a8178a2d",
+            "first_seen_at": "2026-11-17T14:19:10Z",
+            "updated_at": "2026-11-17T14:19:10Z"
         }
     ]
 }
