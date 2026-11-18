@@ -164,6 +164,26 @@
             "id": "f84b4507-5db6-4785-ac65-d405a8178a2d",
             "first_seen_at": "2026-11-17T14:19:10Z",
             "updated_at": "2026-11-17T14:19:10Z"
+        },
+        {
+            "category": "reroute",
+            "title": "Nov. 18, 2026: Line 22 Reroute",
+            "html": "<p><strong>Nov. 18, 2026: Line 22 Reroute</strong><br />\nImpacted Line: 22</p>\n<p>Due to a waterline project on S. Champion Ave., northbound Line 22 will be on reroute starting Wednesday, Nov. 18. The project is expected to last about two weeks. The reroute will be in place all day until work is complete. Plan extra travel time.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "c0139a89e00905e6546fbe3d56e1ed9ccef6335f9bd0068a2640397324904f4b",
+            "id": "1337c318-3d36-4455-b4a6-100cd44fd574",
+            "first_seen_at": "2026-11-18T13:54:31Z",
+            "updated_at": "2026-11-18T13:54:31Z"
+        },
+        {
+            "category": "reroute",
+            "title": "Northbound Line 22",
+            "html": "<p><strong>Northbound Line 22</strong><br />\nRegular route to S. Champion Ave. and Thurman Ave.<br />\nR-Thurman Ave.<br />\nL-Lockbourne Rd.<br />\nL-E. Whittier St.<br />\nR-S. Champion Ave.<br />\nOVER ROUTE</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "366ab9ee815a0a5cae2eec221161082b52ef1ff77e47cc41c9c8ce4b3d65c8c6",
+            "id": "19fa7153-729b-4788-a043-fb906d370f94",
+            "first_seen_at": "2026-11-18T13:54:31Z",
+            "updated_at": "2026-11-18T13:54:31Z"
         }
     ]
 }
