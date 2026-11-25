@@ -1,5 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0"><channel><title>COTA Reroute Notices</title><link>https://cota.com/reroutes/</link><description>Newly observed COTA reroutes, closures, reopenings, and notices no longer listed.</description><language>en-us</language><item><title>Added: Nov. 18, 2026: Line 22 Reroute</title><link>https://cota.com/reroutes/</link><guid isPermaLink="false">urn:cota:notice:1337c318-3d36-4455-b4a6-100cd44fd574:added</guid><pubDate>Wed, 18 Nov 2026 13:54:31 +0000</pubDate><category>reroute</category><category>added</category><description>&lt;p&gt;First observed on the COTA reroutes page.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Nov. 18, 2026: Line 22 Reroute&lt;/strong&gt;&lt;br /&gt;
+<rss version="2.0"><channel><title>COTA Reroute Notices</title><link>https://cota.com/reroutes/</link><description>Newly observed COTA reroutes, closures, reopenings, and notices no longer listed.</description><language>en-us</language><item><title>Removed: Nov. 9, 2026: Bus Stop Improvements</title><link>https://cota.com/reroutes/</link><guid isPermaLink="false">urn:cota:notice:36ff6415-5223-4286-95c3-4efc5f7673fc:removed:1795620686.000000</guid><pubDate>Wed, 25 Nov 2026 15:31:26 +0000</pubDate><category>reroute</category><category>removed</category><description>&lt;p&gt;No longer listed on the COTA reroutes page. This does not imply reopening.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Nov. 9, 2026: Bus Stop Improvements&lt;/strong&gt;&lt;br /&gt;
+Impacted Stops: 5389, 7792, 2738, 2687, 3550&lt;br /&gt;
+Impacted Lines: 5, 6, 9, 21, 22 &amp;amp; 71&lt;br /&gt;
+Impacted Areas: Renner Rd. Park and Ride&lt;/p&gt;
+&lt;p&gt;The stops below will be temporarily closed beginning Monday, Nov. 9, for facility improvements. Construction is expected to take 1–2 weeks to complete. Customers should use neighboring stops while work is underway.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Stop 5389: Georgesville Rd. &amp;amp; W. Broad St.
+&lt;ul&gt;
+&lt;li&gt;Lines: 6, 21&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+&lt;li&gt;Stop 7792: Demorest Rd. Shopping Center
+&lt;ul&gt;
+&lt;li&gt;Line: 9&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+&lt;li&gt;Stop 2738: Sullivant Ave. &amp;amp; Ryan Ave.
+&lt;ul&gt;
+&lt;li&gt;Line: 6&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+&lt;li&gt;Stop 2687: Sullivant Ave. &amp;amp; Martin Ave.
+&lt;ul&gt;
+&lt;li&gt;Line: 6&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+&lt;li&gt;Stop 3550: S. Champion Ave. &amp;amp; E. Whittier St.
+&lt;ul&gt;
+&lt;li&gt;Line 22&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+&lt;li&gt;Renner Rd. Park and Ride
+&lt;ul&gt;
+&lt;li&gt;Lines: 5, 71&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Removed: November 18, 2026: S. High St. &amp; Hosack St.</title><link>https://cota.com/reroutes/</link><guid isPermaLink="false">urn:cota:notice:c27238f1-4d3e-490b-85cd-5d240088353a:removed:1795620686.000000</guid><pubDate>Wed, 25 Nov 2026 15:31:26 +0000</pubDate><category>closure</category><category>removed</category><description>&lt;p&gt;No longer listed on the COTA reroutes page. This does not imply reopening.&lt;/p&gt;&lt;p&gt;&lt;a href="https://cota.com/static/688e6d5f48693ffa8272792bcaa86442/COTA_2026-SID-1059-Closure_Map-Graphic.jpg"&gt;&lt;strong&gt;November 18, 2026: S. High St. &amp;amp; Hosack St.&lt;/strong&gt;&lt;/a&gt;&lt;br /&gt;
+Impacted Stop: 1059&lt;br /&gt;
+Impacted Line: 8&lt;/p&gt;
+&lt;p&gt;Use nearby southbound stops during the temporary closure.&lt;/p&gt;</description></item><item><title>Removed: Nov. 16–20, 2026: E Long St Stop Closures</title><link>https://cota.com/reroutes/</link><guid isPermaLink="false">urn:cota:notice:e9d15529-8ff4-49b7-9326-4c45c7d6eec5:removed:1795620686.000000</guid><pubDate>Wed, 25 Nov 2026 15:31:26 +0000</pubDate><category>closure</category><category>removed</category><description>&lt;p&gt;No longer listed on the COTA reroutes page. This does not imply reopening.&lt;/p&gt;&lt;p&gt;&lt;a href="https://cota.com/reroutes/2026/COTA_SID_4159_4161_Closure_Map.jpg"&gt;&lt;strong&gt;Nov. 16–20, 2026: E Long St Stop Closures&lt;/strong&gt;&lt;/a&gt;&lt;br /&gt;
+Impacted Stops: 4159 &amp;amp; 4161&lt;br /&gt;
+Impacted Line: 7, 9, 11 &amp;amp; 41-46&lt;/p&gt;
+&lt;p&gt;Use nearby eastbound stops during the five-day construction impact.&lt;/p&gt;</description></item><item><title>Added: Nov. 18, 2026: Line 22 Reroute</title><link>https://cota.com/reroutes/</link><guid isPermaLink="false">urn:cota:notice:1337c318-3d36-4455-b4a6-100cd44fd574:added</guid><pubDate>Wed, 18 Nov 2026 13:54:31 +0000</pubDate><category>reroute</category><category>added</category><description>&lt;p&gt;First observed on the COTA reroutes page.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Nov. 18, 2026: Line 22 Reroute&lt;/strong&gt;&lt;br /&gt;
 Impacted Line: 22&lt;/p&gt;
 &lt;p&gt;Due to a waterline project on S. Champion Ave., northbound Line 22 will be on reroute starting Wednesday, Nov. 18. The project is expected to last about two weeks. The reroute will be in place all day until work is complete. Plan extra travel time.&lt;/p&gt;</description></item><item><title>Added: Northbound Line 22</title><link>https://cota.com/reroutes/</link><guid isPermaLink="false">urn:cota:notice:19fa7153-729b-4788-a043-fb906d370f94:added</guid><pubDate>Wed, 18 Nov 2026 13:54:31 +0000</pubDate><category>reroute</category><category>added</category><description>&lt;p&gt;First observed on the COTA reroutes page.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Northbound Line 22&lt;/strong&gt;&lt;br /&gt;
 Regular route to S. Champion Ave. and Thurman Ave.&lt;br /&gt;

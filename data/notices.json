@@ -19,7 +19,8 @@
             "content_hash": "154027b7aa119fd923d956070243a40b7e82df012eef886f188e1fc37b856500",
             "id": "36ff6415-5223-4286-95c3-4efc5f7673fc",
             "first_seen_at": "2026-11-12T01:33:08Z",
-            "updated_at": "2026-11-12T01:33:08Z"
+            "updated_at": "2026-11-12T01:33:08Z",
+            "removed_at": "2026-11-25T15:31:26Z"
         },
         {
             "category": "reroute",
@@ -133,7 +134,8 @@
             "content_hash": "ba89ecec57e90338eff18f6190943cd7eb04e5f455549d5f23f0824797b71205",
             "id": "e9d15529-8ff4-49b7-9326-4c45c7d6eec5",
             "first_seen_at": "2026-11-14T12:07:50Z",
-            "updated_at": "2026-11-14T12:07:50Z"
+            "updated_at": "2026-11-14T12:07:50Z",
+            "removed_at": "2026-11-25T15:31:26Z"
         },
         {
             "category": "closure",
@@ -153,7 +155,8 @@
             "content_hash": "c038572cc70b2a5e86dd9ae16c962926d078c627e3493f0bec322c6f86748ae9",
             "id": "c27238f1-4d3e-490b-85cd-5d240088353a",
             "first_seen_at": "2026-11-17T14:19:10Z",
-            "updated_at": "2026-11-17T14:19:10Z"
+            "updated_at": "2026-11-17T14:19:10Z",
+            "removed_at": "2026-11-25T15:31:26Z"
         },
         {
             "category": "closure",
