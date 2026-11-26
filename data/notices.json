@@ -4,12 +4,12 @@
         {
             "category": "reroute",
             "title": "Nov. 16, 2026: Bus Stop Improvements",
-            "html": "<p><strong>Nov. 16, 2026: Bus Stop Improvements</strong><br />\nImpacted Stops: 1945, 1948, 1978, 7929, 5352 &amp; 7063<br />\nImpacted Lines: 1 Livingston, 22, 23 &amp; 24</p>\n<p>The stops below will be temporarily closed beginning Monday, Nov. 16, for facility improvements. Construction is expected to take 1–2 weeks to complete. Customers should use neighboring stops while work is underway.</p>\n<ul>\n<li>Stop 1945: E. Livingston Ave. &amp; Zettler Rd.\n<ul>\n<li>Lines: 1 Livingston, 23</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 1948: E. Livingston Ave. &amp; Courtright Rd.\n<ul>\n<li>Line: 1 Livingston</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 1978: E. Livingston Ave. &amp; Beechwood Rd.\n<ul>\n<li>Line: 1 Livingston</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 7929: Kimberly Pkwy. N. &amp; Canal Bay Way\n<ul>\n<li>Line: 23</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 5352: S. Hamilton Sq. &amp; Hamilton Sq. Blvd.\n<ul>\n<li>Line: 24</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 7063: Alum Creek Dr. &amp; London-Groveport Rd.\n<ul>\n<li>Lines: 22, 24</li>\n</ul>\n</li>\n</ul>",
+            "html": "<p><strong>Nov. 16, 2026: Bus Stop Improvements</strong><br />\nImpacted Stops: 7929 &amp; 5352<br />\nImpacted Lines: 23 &amp; 24</p>\n<p>The stops below will be temporarily closed beginning Monday, Nov. 16, for facility improvements. Construction is expected to take 1–2 weeks to complete. Customers should use neighboring stops while work is underway.</p>\n<ul>\n<li>Stop 7929: Kimberly Pkwy. N. &amp; Canal Bay Way\n<ul>\n<li>Line: 23</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 5352: S. Hamilton Sq. &amp; Hamilton Sq. Blvd.\n<ul>\n<li>Line: 24</li>\n</ul>\n</li>\n</ul>",
             "source_url": "https://cota.com/reroutes/",
-            "content_hash": "e44e6945d0a3d40f70247126eca8d9e6f814a400d8a4f93944b6b53682308035",
+            "content_hash": "90bdc2e4bc786391b324fbf272facebc1b1499bcd195d6a5bbdf6183cc2e844d",
             "id": "44f1222a-32c6-4284-94dc-7c3686e91e52",
             "first_seen_at": "2026-11-12T01:33:08Z",
-            "updated_at": "2026-11-12T01:33:08Z"
+            "updated_at": "2026-11-26T15:06:12Z"
         },
         {
             "category": "reroute",
@@ -187,6 +187,36 @@
             "id": "19fa7153-729b-4788-a043-fb906d370f94",
             "first_seen_at": "2026-11-18T13:54:31Z",
             "updated_at": "2026-11-18T13:54:31Z"
+        },
+        {
+            "category": "reroute",
+            "title": "Nov. 26, 2026: Line 3 Reroute",
+            "html": "<p><a href=\"https://cota.com/reroutes/2026/COTA_2026_thanksgiving_wattle_reroutes.pdf\"><strong>Nov. 26, 2026: Line 3 Reroute</strong></a><br />\nImpacted Line: 3</p>\n<p>Due to the Thanksgiving Wattle race in Grove City, Line 3 will be rerouted Thursday, Nov. 26, on Stringtown Rd., between Parkway Centre Dr. and Buckeye Parkway. Buses will use a temporary turn at Thistlewood Dr. during the race. COTA will also operate on a Sunday schedule for Thanksgiving. Plan extra travel time and customers should use nearby open stops during this time.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "3b84c0d759b7d01696ebbd1a6e5a9943b6aefd61d7ba45b0c87b22191d4139a3",
+            "id": "330287ff-2337-447a-b384-fd5c12d31ca1",
+            "first_seen_at": "2026-11-26T15:06:12Z",
+            "updated_at": "2026-11-26T15:06:12Z"
+        },
+        {
+            "category": "closure",
+            "title": "Nov. 30, 2026: Lines 4, 7, 9, 11, 12, 41–46 Temporary Stop Closures",
+            "html": "<p><a href=\"https://cota.com/static/e78839bd6c6a97ee85aeb2ada1ab4233/COTA_11-25-26_SID_construction_closures.jpg\"><strong>Nov. 30, 2026: Lines 4, 7, 9, 11, 12, 41–46 Temporary Stop Closures</strong></a><br />\nImpacted Stops: 4168, 4170 &amp; 4662<br />\nImpacted Lines: 4, 7, 9, 11–12 &amp; 41–46</p>\n<p>Due to construction, Stop 4170 located at E. Spring St. &amp; Neilston St., Stop 4168 located at E. Spring St. &amp; Cleveland Ave. and Stop 4662 located at N. 4th St. &amp; E. Spring St. will close starting Monday, Nov. 30, for about five days. During this time, riders on Lines 4, 7, 9, 11, 12, 41, 42, 43, 44, 45 &amp; 46 should use nearby same-directional stops.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "4cb6a290cdff39eb939c2c6c7a4807d308d3b3a4d367d6e18758e4abe916faaf",
+            "id": "5362129e-8ec6-42e0-b5c1-d32f5449fc12",
+            "first_seen_at": "2026-11-26T15:06:12Z",
+            "updated_at": "2026-11-26T15:06:12Z"
+        },
+        {
+            "category": "closure",
+            "title": "Nov. 9, 2026: Bus Stop Improvements",
+            "html": "<p><strong>Nov. 9, 2026: Bus Stop Improvements</strong><br />\nImpacted Stop: 3550<br />\nImpacted Line: 22</p>\n<p>SID 3550 along S. Champion Ave. &amp; E. Whittier St. will be temporarily closed beginning Monday, Nov. 9, for facility improvements. Customers should use neighboring stops while work is underway.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "75dbd7558b732b217333be24d79e846f26c06d50d068d447f1a57607bd0c030a",
+            "id": "5112224c-ab0c-4a71-8091-fb11a8cee9d1",
+            "first_seen_at": "2026-11-26T15:06:12Z",
+            "updated_at": "2026-11-26T15:06:12Z"
         }
     ]
 }
