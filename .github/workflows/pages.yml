@@ -45,13 +45,20 @@ jobs:
         run: composer install --no-dev --prefer-dist --no-interaction --no-progress
       - name: Build site
         run: composer run build
+      - name: Verify site output
+        run: |
+          test -f _site/index.html
+          test -f _site/feed.xml
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v6
       - name: Upload site
         uses: actions/upload-pages-artifact@v5
         with:
+          name: github-pages
           path: _site
       - name: Deploy site
         id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          artifact_name: github-pages
 
