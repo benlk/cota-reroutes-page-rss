@@ -4,12 +4,12 @@
         {
             "category": "reroute",
             "title": "Nov. 16, 2026: Bus Stop Improvements",
-            "html": "<p><strong>Nov. 16, 2026: Bus Stop Improvements</strong><br />\nImpacted Stops: 1945, 1948, 1978, 7929, 5352 &amp; 7063<br />\nImpacted Lines: 1 Livingston, 22, 23 &amp; 24</p>\n<p>The stops below will be temporarily closed beginning Monday, Nov. 16, for facility improvements. Construction is expected to take 1–2 weeks to complete. Customers should use neighboring stops while work is underway.</p>\n<ul>\n<li>Stop 1945: E. Livingston Ave. &amp; Zettler Rd.\n<ul>\n<li>Lines: 1 Livingston, 23</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 1948: E. Livingston Ave. &amp; Courtright Rd.\n<ul>\n<li>Line: 1 Livingston</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 1978: E. Livingston Ave. &amp; Beechwood Rd.\n<ul>\n<li>Line: 1 Livingston</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 7929: Kimberly Pkwy. N. &amp; Canal Bay Way\n<ul>\n<li>Line: 23</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 5352: S. Hamilton Sq. &amp; Hamilton Sq. Blvd.\n<ul>\n<li>Line: 24</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 7063: Alum Creek Dr. &amp; London-Groveport Rd.\n<ul>\n<li>Lines: 22, 24</li>\n</ul>\n</li>\n</ul>",
+            "html": "<p><strong>Nov. 16, 2026: Bus Stop Improvements</strong><br />\nImpacted Stops: 7929 &amp; 5352<br />\nImpacted Lines: 23 &amp; 24</p>\n<p>The stops below will be temporarily closed beginning Monday, Nov. 16, for facility improvements. Construction is expected to take 1–2 weeks to complete. Customers should use neighboring stops while work is underway.</p>\n<ul>\n<li>Stop 7929: Kimberly Pkwy. N. &amp; Canal Bay Way\n<ul>\n<li>Line: 23</li>\n</ul>\n</li>\n</ul>\n<ul>\n<li>Stop 5352: S. Hamilton Sq. &amp; Hamilton Sq. Blvd.\n<ul>\n<li>Line: 24</li>\n</ul>\n</li>\n</ul>",
             "source_url": "https://cota.com/reroutes/",
-            "content_hash": "e44e6945d0a3d40f70247126eca8d9e6f814a400d8a4f93944b6b53682308035",
+            "content_hash": "90bdc2e4bc786391b324fbf272facebc1b1499bcd195d6a5bbdf6183cc2e844d",
             "id": "44f1222a-32c6-4284-94dc-7c3686e91e52",
             "first_seen_at": "2026-11-12T01:33:08Z",
-            "updated_at": "2026-11-12T01:33:08Z"
+            "updated_at": "2026-11-26T15:06:12Z"
         },
         {
             "category": "reroute",
@@ -19,17 +19,19 @@
             "content_hash": "154027b7aa119fd923d956070243a40b7e82df012eef886f188e1fc37b856500",
             "id": "36ff6415-5223-4286-95c3-4efc5f7673fc",
             "first_seen_at": "2026-11-12T01:33:08Z",
-            "updated_at": "2026-11-12T01:33:08Z"
+            "updated_at": "2026-11-12T01:33:08Z",
+            "removed_at": "2026-11-25T15:31:26Z"
         },
         {
             "category": "reroute",
             "title": "Nov. 2, 2026: Bus Stop Improvements",
-            "html": "<p><strong>Nov. 2, 2026: Bus Stop Improvements</strong><br />\nImpacted Stops: 1197, 1813, 6084 &amp; 8121<br />\nImpacted Lines: 2, 8, 11, 12, 22, 31 &amp; 102</p>\n<p>Stops 1197, 1813, 6084 &amp; 8121 will be temporarily closed beginning Monday, Nov. 2, for facility improvements. Construction is expected to take 2 weeks to complete. Customers should use neighboring stops while work is underway. Lines 22 and 31 will lay over eastbound on Williams Ave. between Yard St. and Rail St.</p>\n<ul>\n<li><strong>Stop 1197:</strong> N. High St. &amp; E. Hudson St.</li>\n<li><strong>Stop 1813:</strong> McGuffey Rd. &amp; Genessee Ave.</li>\n<li><strong>Stop 6084:</strong> Fields Ave. &amp; Mobility Dr.</li>\n<li><strong>Stop 8121:</strong> Rail St. &amp; Baldwin Dr.</li>\n</ul>",
+            "html": "<p><strong>Nov. 2, 2026: Bus Stop Improvements</strong><br />\nImpacted Stop: 1197<br />\nImpacted Lines: 2, 8, 11, 12, 22, 31 &amp; 102</p>\n<p>Stops 1197 will be temporarily closed beginning Monday, Nov. 2, for facility improvements. Construction is expected to take 2 weeks to complete. Customers should use neighboring stops while work is underway. Lines 22 and 31 will lay over eastbound on Williams Ave. between Yard St. and Rail St.</p>\n<ul>\n<li><strong>Stop 1197:</strong> N. High St. &amp; E. Hudson St.</li>\n</ul>",
             "source_url": "https://cota.com/reroutes/",
-            "content_hash": "b1473f9884e8cabed1afe30772c7ac7567ff488b380f693b181ad60e99120881",
+            "content_hash": "15f6a98c642f56bdf00280da8c41206eb1aed30c67820786f2701865654b41e4",
             "id": "3215329e-a3e9-41ab-80cb-344f317cb85d",
             "first_seen_at": "2026-11-12T01:33:08Z",
-            "updated_at": "2026-11-12T01:33:08Z"
+            "updated_at": "2026-11-13T13:03:07Z",
+            "removed_at": "2026-11-17T14:19:10Z"
         },
         {
             "category": "reroute",
@@ -59,7 +61,8 @@
             "content_hash": "b1c30f217ff5d2f9733f2005d0f636f390baa01fd20727274a89b33a81a3574a",
             "id": "43d46791-0a01-4204-a9d5-1f3f4273c6a6",
             "first_seen_at": "2026-11-12T01:33:08Z",
-            "updated_at": "2026-11-12T01:33:08Z"
+            "updated_at": "2026-11-12T01:33:08Z",
+            "removed_at": "2026-11-17T14:19:10Z"
         },
         {
             "category": "closure",
@@ -100,6 +103,120 @@
             "id": "19b33c78-2514-42c6-9f71-9454706f6991",
             "first_seen_at": "2026-11-12T01:33:08Z",
             "updated_at": "2026-11-12T01:33:08Z"
+        },
+        {
+            "category": "reroute",
+            "title": "Nov. 15, 2026: Hot Chocolate Run Reroutes",
+            "html": "<p><a href=\"https://cota.com/reroutes/2026/COTA_2026_HotChocolateRun_Reroutes.pdf\"><strong>Nov. 15, 2026: Hot Chocolate Run Reroutes</strong></a><br />\nImpacted Lines: 1–12, 30, 102 &amp; CMAX</p>\n<p>Impacts start as early as 4 a.m. Long Street will be closed during the reroute. Please use nearby stops and allow extra time for your trip during the event.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "35083ac5f03dc7c7c705b08ddf070c6f45daaeabc1799c8e3869300a47a634b0",
+            "id": "05ded2c1-ecc4-469d-aed9-74f88b68c77b",
+            "first_seen_at": "2026-11-14T12:07:50Z",
+            "updated_at": "2026-11-14T12:07:50Z",
+            "removed_at": "2026-11-17T14:19:10Z"
+        },
+        {
+            "category": "reroute",
+            "title": "Nov. 14, 2026: OSU Home Game",
+            "html": "<p><a href=\"https://cota.com/reroutes/2026/COTA_11-13-26_OSU_home_game_reroutes.pdf\"><strong>Nov. 14, 2026: OSU Home Game</strong></a><br />\nImpacted Lines: 1, 8, 22, 30 &amp; 31</p>\n<p>Due to the Ohio State home game, Lines 1, 8, 22, 30 &amp; 31 will be temporarily rerouted on Saturday, Nov. 14, starting as early as 9 a.m. Please allow extra travel time and check your routes before traveling.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "12c9ff28144c2e7a38983d903661d39dd64676bf79d265db4b00688d08296590",
+            "id": "d750daeb-55d4-46e5-9cbd-5664904c0b57",
+            "first_seen_at": "2026-11-14T12:07:50Z",
+            "updated_at": "2026-11-14T12:07:50Z",
+            "removed_at": "2026-11-17T14:19:10Z"
+        },
+        {
+            "category": "closure",
+            "title": "Nov. 16–20, 2026: E Long St Stop Closures",
+            "html": "<p><a href=\"https://cota.com/reroutes/2026/COTA_SID_4159_4161_Closure_Map.jpg\"><strong>Nov. 16–20, 2026: E Long St Stop Closures</strong></a><br />\nImpacted Stops: 4159 &amp; 4161<br />\nImpacted Line: 7, 9, 11 &amp; 41-46</p>\n<p>Use nearby eastbound stops during the five-day construction impact.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "ba89ecec57e90338eff18f6190943cd7eb04e5f455549d5f23f0824797b71205",
+            "id": "e9d15529-8ff4-49b7-9326-4c45c7d6eec5",
+            "first_seen_at": "2026-11-14T12:07:50Z",
+            "updated_at": "2026-11-14T12:07:50Z",
+            "removed_at": "2026-11-25T15:31:26Z"
+        },
+        {
+            "category": "closure",
+            "title": "October 26, 2026: Bus Stop Improvements",
+            "html": "<p><strong>October 26, 2026: Bus Stop Improvements</strong><br />\nImpacted Stop: 4535<br />\nImpacted Lines: 34 &amp; 35</p>\n<p>Stops 4535 along Morse Rd. will be temporarily closed beginning Monday, Oct. 26, for facility improvements. Customers should use neighboring stops while work is underway.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "6f390ae21e7e05be1ae8fbbafe0a5b89d9ec6d45c468380ed88a1770afd0a798",
+            "id": "26d34918-64c5-41ab-b93c-1bfe58eea9b2",
+            "first_seen_at": "2026-11-14T12:07:50Z",
+            "updated_at": "2026-11-14T12:07:50Z"
+        },
+        {
+            "category": "closure",
+            "title": "November 18, 2026: S. High St. & Hosack St.",
+            "html": "<p><a href=\"https://cota.com/static/688e6d5f48693ffa8272792bcaa86442/COTA_2026-SID-1059-Closure_Map-Graphic.jpg\"><strong>November 18, 2026: S. High St. &amp; Hosack St.</strong></a><br />\nImpacted Stop: 1059<br />\nImpacted Line: 8</p>\n<p>Use nearby southbound stops during the temporary closure.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "c038572cc70b2a5e86dd9ae16c962926d078c627e3493f0bec322c6f86748ae9",
+            "id": "c27238f1-4d3e-490b-85cd-5d240088353a",
+            "first_seen_at": "2026-11-17T14:19:10Z",
+            "updated_at": "2026-11-17T14:19:10Z",
+            "removed_at": "2026-11-25T15:31:26Z"
+        },
+        {
+            "category": "closure",
+            "title": "Nov. 10, 2026: Lines 10 & 25 Long-Term Stop Closures",
+            "html": "<p><strong>Nov. 10, 2026: Lines 10 &amp; 25 Long-Term Stop Closures</strong><br />\nImpacted Stops: 5428, 6297, 6298 &amp; 6383<br />\nImpacted Lines: 10 &amp; 25</p>\n<p>Due to construction, Stop 5428 located at E. Broad St. &amp; Taylor Station Rd., Stop 6383 located at E. Broad St. &amp; McNaughten Rd. and Stop 6297 located at E. Broad St. &amp; Outerbelt St. are closed and expected to reopen in summer 2027. Stop 6298 located at E. Broad St. &amp; Outerbelt St. is expected to reopen first, by early 2027. During this time, Line 10 and Line 25 riders should use nearby same-directional stops during this time.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "536de503cd8ed1628837df0fbafc480e3ec26782ed32038e6cfcf66357204a71",
+            "id": "f84b4507-5db6-4785-ac65-d405a8178a2d",
+            "first_seen_at": "2026-11-17T14:19:10Z",
+            "updated_at": "2026-11-17T14:19:10Z"
+        },
+        {
+            "category": "reroute",
+            "title": "Nov. 18, 2026: Line 22 Reroute",
+            "html": "<p><strong>Nov. 18, 2026: Line 22 Reroute</strong><br />\nImpacted Line: 22</p>\n<p>Due to a waterline project on S. Champion Ave., northbound Line 22 will be on reroute starting Wednesday, Nov. 18. The project is expected to last about two weeks. The reroute will be in place all day until work is complete. Plan extra travel time.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "c0139a89e00905e6546fbe3d56e1ed9ccef6335f9bd0068a2640397324904f4b",
+            "id": "1337c318-3d36-4455-b4a6-100cd44fd574",
+            "first_seen_at": "2026-11-18T13:54:31Z",
+            "updated_at": "2026-11-18T13:54:31Z"
+        },
+        {
+            "category": "reroute",
+            "title": "Northbound Line 22",
+            "html": "<p><strong>Northbound Line 22</strong><br />\nRegular route to S. Champion Ave. and Thurman Ave.<br />\nR-Thurman Ave.<br />\nL-Lockbourne Rd.<br />\nL-E. Whittier St.<br />\nR-S. Champion Ave.<br />\nOVER ROUTE</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "366ab9ee815a0a5cae2eec221161082b52ef1ff77e47cc41c9c8ce4b3d65c8c6",
+            "id": "19fa7153-729b-4788-a043-fb906d370f94",
+            "first_seen_at": "2026-11-18T13:54:31Z",
+            "updated_at": "2026-11-18T13:54:31Z"
+        },
+        {
+            "category": "reroute",
+            "title": "Nov. 26, 2026: Line 3 Reroute",
+            "html": "<p><a href=\"https://cota.com/reroutes/2026/COTA_2026_thanksgiving_wattle_reroutes.pdf\"><strong>Nov. 26, 2026: Line 3 Reroute</strong></a><br />\nImpacted Line: 3</p>\n<p>Due to the Thanksgiving Wattle race in Grove City, Line 3 will be rerouted Thursday, Nov. 26, on Stringtown Rd., between Parkway Centre Dr. and Buckeye Parkway. Buses will use a temporary turn at Thistlewood Dr. during the race. COTA will also operate on a Sunday schedule for Thanksgiving. Plan extra travel time and customers should use nearby open stops during this time.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "3b84c0d759b7d01696ebbd1a6e5a9943b6aefd61d7ba45b0c87b22191d4139a3",
+            "id": "330287ff-2337-447a-b384-fd5c12d31ca1",
+            "first_seen_at": "2026-11-26T15:06:12Z",
+            "updated_at": "2026-11-26T15:06:12Z"
+        },
+        {
+            "category": "closure",
+            "title": "Nov. 30, 2026: Lines 4, 7, 9, 11, 12, 41–46 Temporary Stop Closures",
+            "html": "<p><a href=\"https://cota.com/static/e78839bd6c6a97ee85aeb2ada1ab4233/COTA_11-25-26_SID_construction_closures.jpg\"><strong>Nov. 30, 2026: Lines 4, 7, 9, 11, 12, 41–46 Temporary Stop Closures</strong></a><br />\nImpacted Stops: 4168, 4170 &amp; 4662<br />\nImpacted Lines: 4, 7, 9, 11–12 &amp; 41–46</p>\n<p>Due to construction, Stop 4170 located at E. Spring St. &amp; Neilston St., Stop 4168 located at E. Spring St. &amp; Cleveland Ave. and Stop 4662 located at N. 4th St. &amp; E. Spring St. will close starting Monday, Nov. 30, for about five days. During this time, riders on Lines 4, 7, 9, 11, 12, 41, 42, 43, 44, 45 &amp; 46 should use nearby same-directional stops.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "4cb6a290cdff39eb939c2c6c7a4807d308d3b3a4d367d6e18758e4abe916faaf",
+            "id": "5362129e-8ec6-42e0-b5c1-d32f5449fc12",
+            "first_seen_at": "2026-11-26T15:06:12Z",
+            "updated_at": "2026-11-26T15:06:12Z"
+        },
+        {
+            "category": "closure",
+            "title": "Nov. 9, 2026: Bus Stop Improvements",
+            "html": "<p><strong>Nov. 9, 2026: Bus Stop Improvements</strong><br />\nImpacted Stop: 3550<br />\nImpacted Line: 22</p>\n<p>SID 3550 along S. Champion Ave. &amp; E. Whittier St. will be temporarily closed beginning Monday, Nov. 9, for facility improvements. Customers should use neighboring stops while work is underway.</p>",
+            "source_url": "https://cota.com/reroutes/",
+            "content_hash": "75dbd7558b732b217333be24d79e846f26c06d50d068d447f1a57607bd0c030a",
+            "id": "5112224c-ab0c-4a71-8091-fb11a8cee9d1",
+            "first_seen_at": "2026-11-26T15:06:12Z",
+            "updated_at": "2026-11-26T15:06:12Z"
         }
     ]
 }
